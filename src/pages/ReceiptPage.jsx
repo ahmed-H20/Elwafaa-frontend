@@ -201,12 +201,12 @@ export default function ReceiptPage({
 
     const clientInitials = customerName
       ? customerName
-          .split(" ")
-          .filter(Boolean)
-          .map((n) => n[0])
-          .join("")
-          .slice(0, 2)
-          .toUpperCase()
+        .split(" ")
+        .filter(Boolean)
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
       : "CL";
 
     const finalRawNum = invoiceNumber?.trim() || getNextInvoiceNumber(invoicesList);
@@ -243,7 +243,7 @@ export default function ReceiptPage({
   const handleDownloadPdf = async () => {
     setIsGeneratingPdf(true);
     try {
-      const fileName = `فاتورة_مبيعات_${invoiceNumber || "1"}.pdf`;
+      const fileName = `فاتورة_مبيعات_${customerName}.pdf`;
       await downloadReceiptPDF("receipt-document", fileName);
     } catch (err) {
       console.error("PDF generation failed:", err);
@@ -292,9 +292,8 @@ export default function ReceiptPage({
         <div className="mobile-tabs-bar">
           <button
             type="button"
-            className={`mobile-tab-btn ${
-              activeMobileTab === "form" ? "active" : ""
-            }`}
+            className={`mobile-tab-btn ${activeMobileTab === "form" ? "active" : ""
+              }`}
             onClick={() => setActiveMobileTab("form")}
           >
             <Edit3 size={15} />
@@ -303,9 +302,8 @@ export default function ReceiptPage({
 
           <button
             type="button"
-            className={`mobile-tab-btn ${
-              activeMobileTab === "preview" ? "active" : ""
-            }`}
+            className={`mobile-tab-btn ${activeMobileTab === "preview" ? "active" : ""
+              }`}
             onClick={() => setActiveMobileTab("preview")}
           >
             <Eye size={15} />
