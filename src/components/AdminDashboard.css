@@ -1,0 +1,460 @@
+/* Admin Dashboard Styling - Al-Wafaa Medical Supplies and Cosmetic */
+
+.admin-page-container {
+  min-height: 100vh;
+  background-color: #faf9f4;
+  padding: 36px 48px 60px 48px;
+  font-family: 'Tajawal', 'Cairo', system-ui, -apple-system, sans-serif;
+  color: #1a1a1a;
+  direction: ltr; /* English title and LTR table as in original image */
+  box-sizing: border-box;
+}
+
+.admin-content-wrapper {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* TOP HEADER & TITLE */
+.admin-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.admin-title-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-main-title {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+/* Dual-tone letters matching the image exactly */
+.title-green {
+  color: var(--teal-primary, #004f49);
+}
+
+.title-sand {
+  color: #eedc9f;
+}
+
+.admin-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-nav-to-receipt {
+  background-color: var(--teal-primary, #004f49);
+  color: #ffffff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 79, 73, 0.2);
+}
+
+.btn-nav-to-receipt:hover {
+  background-color: var(--teal-dark, #003d38);
+  transform: translateY(-1px);
+}
+
+/* STATS CARD */
+.admin-stats-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 20px 36px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f1f0e6;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.stat-item {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.stat-number {
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--teal-primary, #004f49);
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.stat-label-arabic {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #334155;
+  direction: rtl;
+  white-space: nowrap;
+}
+
+.stats-divider {
+  width: 1px;
+  height: 38px;
+  background-color: #e5e7eb;
+}
+
+/* SEARCH BAR */
+.admin-search-bar {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 320px;
+  border: 1px solid #edece4;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin-search-bar:focus-within {
+  border-color: var(--teal-primary, #004f49);
+  box-shadow: 0 0 0 3px rgba(0, 79, 73, 0.1);
+}
+
+.search-icon {
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13.5px;
+  color: #1f2937;
+  width: 100%;
+  direction: rtl;
+  text-align: right;
+  font-family: inherit;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+  direction: rtl;
+}
+
+/* INVOICES TABLE CARD */
+.admin-table-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #edece4;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  width: 100%;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-table thead tr {
+  background-color: #f7f4ea;
+  border-bottom: 1px solid #ede8d8;
+}
+
+.admin-table th {
+  padding: 14px 28px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #4b5563;
+  direction: rtl;
+  text-align: right;
+}
+
+.admin-table th.th-client {
+  width: 40%;
+}
+
+.admin-table th.th-inv {
+  width: 25%;
+  text-align: center;
+}
+
+.admin-table th.th-total {
+  width: 20%;
+  text-align: center;
+}
+
+.admin-table th.th-action {
+  width: 15%;
+  text-align: center;
+}
+
+/* TABLE BODY ROWS */
+.admin-table tbody tr {
+  border-bottom: 1px solid #f8f7f2;
+  transition: background-color 0.15s;
+}
+
+.admin-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.admin-table tbody tr:hover {
+  background-color: #fcfbf7;
+}
+
+.admin-table td {
+  padding: 16px 28px;
+  vertical-align: middle;
+}
+
+/* Client Column */
+.client-info-cell {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.client-avatar-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.avatar-np {
+  background-color: #0b3336;
+  color: #38bdf8;
+}
+
+.avatar-pc {
+  background-color: #4a2523;
+  color: #fca5a5;
+}
+
+.avatar-bv {
+  background-color: #1b2a3a;
+  color: #7dd3fc;
+}
+
+.avatar-default {
+  background-color: var(--teal-primary, #004f49);
+  color: #ffffff;
+}
+
+.client-name-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* Invoice Badge Column */
+.inv-number-cell {
+  text-align: center;
+}
+
+.inv-badge-pill {
+  display: inline-block;
+  background-color: #f7f4ea;
+  color: #4b5563;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-family: monospace, sans-serif;
+  border: 1px solid #eae5d4;
+}
+
+/* Total Amount Column */
+.total-amount-cell {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.amount-number {
+  font-size: 18px;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.1;
+}
+
+.amount-currency {
+  font-size: 10px;
+  font-weight: 700;
+  color: #6b7280;
+  letter-spacing: 0.5px;
+  margin-top: 1px;
+}
+
+/* Action View Link */
+.action-cell {
+  text-align: right;
+  padding-right: 28px;
+}
+
+.btn-view-invoice {
+  background: transparent;
+  border: none;
+  color: var(--teal-primary, #004f49);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.btn-view-invoice:hover {
+  background-color: var(--teal-light, #e6f7f5);
+  color: var(--teal-dark, #003d38);
+  transform: translateX(2px);
+}
+
+/* PAGINATION ROW */
+.admin-pagination-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.pagination-btn {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.pagination-btn.active {
+  background-color: var(--teal-primary, #004f49);
+  border-color: var(--teal-primary, #004f49);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.pagination-btn.nav-text {
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  padding: 0 6px;
+}
+
+.pagination-btn.nav-text:hover:not(:disabled) {
+  color: #111827;
+  background: transparent;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-dots {
+  color: #9ca3af;
+  padding: 0 4px;
+  font-size: 13px;
+}
+
+/* RESPONSIVE STYLES */
+@media (max-width: 768px) {
+  .admin-page-container {
+    padding: 16px 14px 40px 14px;
+  }
+
+  .admin-main-title {
+    font-size: 24px;
+  }
+
+  .admin-stats-card {
+    padding: 14px 18px;
+    gap: 12px;
+    justify-content: space-around;
+  }
+
+  .stat-item {
+    gap: 8px;
+  }
+
+  .stat-number {
+    font-size: 26px;
+  }
+
+  .stat-label-arabic {
+    font-size: 11px;
+    white-space: normal;
+    line-height: 1.2;
+    max-width: 90px;
+  }
+
+  .admin-search-bar {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 10px 10px;
+  }
+
+  .client-name-text {
+    font-size: 13.5px;
+  }
+
+  .amount-number {
+    font-size: 15px;
+  }
+
+  .inv-badge-pill {
+    padding: 3px 8px;
+    font-size: 11px;
+  }
+}

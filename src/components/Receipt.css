@@ -1,0 +1,429 @@
+/* Receipt Styling - Pixel-perfect match for شركة الوفاء للمستلزمات */
+
+.receipt-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 10px;
+  background-color: transparent;
+  min-height: 100%;
+}
+
+.receipt-sheet {
+  position: relative;
+  width: 723px;
+  min-width: 723px;
+  height: 1024px;
+  min-height: 1024px;
+  max-height: 1024px;
+  background: #ffffff;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  font-family: 'Tajawal', 'Cairo', system-ui, -apple-system, sans-serif;
+  color: #1a1a1a;
+  box-sizing: border-box;
+  direction: rtl;
+  font-feature-settings: "liga" 1, "calt" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* TOP HEADER BANNER */
+.receipt-header-banner {
+  position: relative;
+  width: 100%;
+  height: 48px;
+  background-color: var(--teal-primary, #004f49);
+  flex-shrink: 0;
+}
+
+.header-center-badge {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 410px;
+  max-width: 90%;
+  height: 66px;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 22px;
+  box-shadow: 0 4px 12px rgba(0, 79, 73, 0.16);
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+/* Default / White Theme - Clean, crisp white card matching executive corporate letterheads */
+.header-center-badge.theme-white,
+.header-center-badge:not(.theme-dark) {
+  background-color: #ffffff;
+  border: 2px solid var(--teal-primary, #004f49);
+  border-top: none;
+}
+
+.header-center-badge.theme-white .header-company-name,
+.header-center-badge:not(.theme-dark) .header-company-name {
+  color: var(--teal-primary, #004f49);
+}
+
+/* Dark Theme - Deep Teal background with aqua accent border */
+.header-center-badge.theme-dark {
+  background-color: var(--teal-primary, #004f49);
+  border: 2px solid var(--teal-accent, #33ada0);
+  border-top: none;
+}
+
+.header-center-badge.theme-dark .header-company-name {
+  color: #ffffff;
+}
+
+.header-badge-logo {
+  height: 50px;
+  width: auto;
+  max-width: 60px;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: block;
+}
+
+.header-center-badge.theme-dark .header-badge-logo {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 3px;
+  height: 44px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.header-company-name {
+  font-size: 23px;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  padding-bottom: 2px;
+  white-space: nowrap;
+  letter-spacing: normal !important;
+}
+
+/* CONTENT CONTAINER (73px margins on left and right) */
+.receipt-body {
+  padding: 24px 73px 0 73px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TOP INFO ROW */
+.receipt-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 18px;
+  margin-bottom: 26px;
+  width: 100%;
+}
+
+/* Title on visual LEFT (order 2 in RTL) */
+.invoice-title-block {
+  order: 2;
+  display: flex;
+  align-items: center;
+}
+
+.invoice-title {
+  color: var(--teal-primary, #004f49);
+  font-size: 38px;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.1;
+  letter-spacing: normal !important;
+}
+
+/* Meta on visual RIGHT (order 1 in RTL) */
+.invoice-meta-block {
+  order: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: right;
+  min-width: 180px;
+}
+
+.meta-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 12px;
+  font-size: 16px;
+  color: #1f2937;
+  font-weight: 500;
+  letter-spacing: normal;
+}
+
+.meta-label {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.meta-val {
+  font-weight: 500;
+  color: #111827;
+}
+
+.invoice-no-val {
+  font-weight: 600;
+}
+
+/* TABLE SECTION */
+.receipt-table-container {
+  width: 100%;
+  margin-top: 6px;
+}
+
+.receipt-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.receipt-table th {
+  background-color: #dabf8a;
+  color: #000000;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 8px 4px;
+  border-bottom: 1.5px solid var(--teal-primary, #004f49);
+  text-align: center;
+  letter-spacing: normal !important;
+}
+
+.receipt-table th.col-index {
+  width: 7%;
+}
+
+.receipt-table th.col-desc {
+  width: 45%;
+  letter-spacing: normal !important;
+}
+
+.receipt-table th.col-qty {
+  width: 16%;
+}
+
+.receipt-table th.col-price {
+  width: 16%;
+}
+
+.receipt-table th.col-total {
+  width: 16%;
+}
+
+.receipt-table tbody tr {
+  height: 32px;
+  border-bottom: 1px solid #758380;
+}
+
+.receipt-table td {
+  padding: 4px 6px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #111827;
+  text-align: center;
+  vertical-align: middle;
+  letter-spacing: normal;
+}
+
+.receipt-table td.col-desc {
+  text-align: center;
+  font-weight: 600;
+}
+
+.receipt-table tr.dashed-row td {
+  color: #4b5563;
+  font-weight: 600;
+}
+
+/* Solid separator line below the table */
+.table-bottom-divider {
+  width: 100%;
+  height: 1.5px;
+  background-color: #1a1a1a;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* BELOW TABLE: LEFT TOTALS & RIGHT THANK YOU / NOTES / CONTACT */
+.receipt-middle-area {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  margin-top: 0px;
+}
+
+/* Left Totals Box: Order 2 in RTL (renders on the LEFT, x: 73 to 251) */
+.receipt-totals-box {
+  order: 2;
+  width: 180px;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 8px;
+  min-height: 36px;
+}
+
+.total-label-stacked {
+  order: 1;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #000000;
+  text-align: right;
+  letter-spacing: normal;
+}
+
+.total-val {
+  order: 2;
+  font-size: 15px;
+  font-weight: 600;
+  color: #000000;
+  text-align: left;
+  direction: ltr;
+}
+
+.grand-total-row {
+  background-color: #dabf8a;
+  min-height: 52px;
+  padding: 4px 10px;
+  margin-top: 2px;
+}
+
+.grand-total-row .bold-label {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.grand-total-row .bold-val {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+/* Right Content: Order 1 in RTL (renders on the RIGHT) */
+.receipt-right-content {
+  order: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-right: 20px;
+}
+
+/* Center-Right Thank You Greeting */
+.receipt-thanks-box {
+  margin-top: 48px;
+  text-align: center;
+  margin-left: -50px;
+}
+
+.thanks-text {
+  color: var(--teal-primary, #004f49);
+  font-size: 34px;
+  font-weight: 400;
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+  letter-spacing: normal !important;
+  display: inline-block;
+  direction: rtl;
+}
+
+/* Notes Section */
+.receipt-notes-section {
+  margin-top: 50px;
+  text-align: right;
+}
+
+.notes-title {
+  color: var(--teal-primary, #004f49);
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  letter-spacing: normal;
+}
+
+.notes-text {
+  font-size: 12px;
+  color: #1f2937;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: normal;
+}
+
+/* Footer Contact Info */
+.receipt-contact-card {
+  margin-top: 85px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+  align-self: flex-start;
+}
+
+.contact-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: right;
+  direction: ltr;
+  align-items: flex-end;
+}
+
+.contact-phone {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.contact-email {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.contact-icons-box {
+  width: 17px;
+  height: 38px;
+  background-color: var(--teal-primary, #004f49);
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.contact-icon {
+  width: 11px;
+  height: 11px;
+  stroke-width: 2.2;
+}
+
+/* BOTTOM STRIP */
+.receipt-bottom-bar {
+  width: 100%;
+  height: 22px;
+  background-color: var(--teal-primary, #004f49);
+  flex-shrink: 0;
+}

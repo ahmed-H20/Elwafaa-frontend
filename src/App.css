@@ -1,0 +1,411 @@
+/* Main Application Layout - Responsive for Mobile & Desktop */
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #faf9f4;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* TOP NAVBAR */
+.app-navbar {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  gap: 12px;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo-badge {
+  width: 38px;
+  height: 38px;
+  background: #ffffff;
+  border: 1.5px solid var(--teal-primary, #004f49);
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0, 79, 73, 0.12);
+}
+
+.navbar-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.brand-text-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--teal-primary, #004f49);
+  line-height: 1.2;
+}
+
+.brand-subtitle {
+  font-size: 11px;
+  color: #64748b;
+}
+
+/* NAVIGATION VIEW SWITCHER TABS (ADMIN VS INVOICE) */
+.view-mode-tabs-container {
+  display: flex;
+  background: #f1f5f9;
+  padding: 3px;
+  border-radius: 9px;
+  gap: 3px;
+  border: 1px solid #e2e8f0;
+}
+
+.view-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  background: transparent;
+  color: #64748b;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.view-tab-btn:hover {
+  color: #1e293b;
+}
+
+.view-tab-btn.active {
+  background: #ffffff;
+  color: var(--teal-primary, #004f49);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.navbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.zoom-btn {
+  background: transparent;
+  border: none;
+  padding: 5px 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zoom-btn:hover {
+  background: #e2e8f0;
+}
+
+.zoom-level-text {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0 6px;
+  color: #334155;
+  min-width: 40px;
+  text-align: center;
+}
+
+.btn-toggle-panel {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-toggle-panel:hover {
+  background: #e2e8f0;
+}
+
+.btn-nav-action {
+  background: var(--teal-primary, #004f49);
+  color: #ffffff;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-nav-action:hover {
+  background: var(--teal-dark, #003d38);
+}
+
+.btn-nav-action.pdf {
+  background: #b91c1c;
+}
+
+.btn-nav-action.pdf:hover {
+  background: #991b1b;
+}
+
+/* MOBILE VIEW SWITCHER BAR */
+.mobile-tabs-container {
+  display: none;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 8px 12px;
+  position: sticky;
+  top: 57px;
+  z-index: 40;
+}
+
+.mobile-tabs-bar {
+  display: flex;
+  width: 100%;
+  background: #f1f5f9;
+  padding: 3px;
+  border-radius: 10px;
+  gap: 4px;
+}
+
+.mobile-tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  background: transparent;
+  color: #64748b;
+  transition: all 0.2s;
+}
+
+.mobile-tab-btn.active {
+  background: #ffffff;
+  color: var(--teal-primary, #004f49);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* MAIN WORKSPACE */
+.app-workspace {
+  flex: 1;
+  display: flex;
+  padding: 20px;
+  gap: 24px;
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+  align-items: flex-start;
+  box-sizing: border-box;
+}
+
+/* PREVIEW PANE */
+.preview-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding-bottom: 80px;
+}
+
+.preview-badge-status {
+  margin-bottom: 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #117e57;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  text-align: center;
+}
+
+/* SCALED RECEIPT CONTAINER */
+.receipt-fit-outer {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  overflow-x: auto;
+  padding: 4px 0;
+}
+
+.receipt-mobile-scaler {
+  position: relative;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+
+.receipt-mobile-inner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 723px;
+  height: 1024px;
+  transform-origin: top right;
+}
+
+/* MOBILE FLOATING ACTION BAR */
+.mobile-bottom-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  padding: 10px 14px;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+  gap: 8px;
+}
+
+.mobile-bottom-bar .btn-mobile-submit {
+  flex: 2;
+  background: var(--teal-primary, #004f49);
+  color: #ffffff;
+  border: none;
+  padding: 11px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.mobile-bottom-bar .btn-mobile-pdf {
+  flex: 1.5;
+  background: #b91c1c;
+  color: #ffffff;
+  border: none;
+  padding: 11px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.mobile-bottom-bar .btn-mobile-view-toggle {
+  flex: 1;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 11px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* RESPONSIVE MEDIA QUERIES */
+@media (max-width: 860px) {
+  .app-navbar {
+    padding: 10px 14px;
+    flex-wrap: wrap;
+  }
+
+  .navbar-controls .btn-nav-action,
+  .navbar-controls .btn-toggle-panel {
+    display: none;
+  }
+
+  .view-mode-tabs-container {
+    width: 100%;
+    order: 3;
+    justify-content: center;
+  }
+
+  .view-tab-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .mobile-tabs-container {
+    display: block;
+  }
+
+  .mobile-bottom-bar {
+    display: flex;
+  }
+
+  .app-workspace {
+    padding: 12px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .control-panel {
+    max-width: 100%;
+    margin-bottom: 60px;
+  }
+
+  .preview-pane {
+    padding-bottom: 90px;
+  }
+}
