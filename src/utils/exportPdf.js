@@ -107,32 +107,46 @@ export async function shareReceiptOnWhatsApp({
 }) {
   const cleanName = customerName?.trim() ? `_${customerName.trim().replace(/\s+/g, "_")}` : "";
   const filename = `فاتورة_مبيعات_${invoiceNumber}${cleanName}.pdf`;
-  const shareText = `*فاتورة مبيعات - شركة الوفاء للمستلزمات*\n\n📄 رقم الفاتورة: #${invoiceNumber}\n👤 العميل: ${customerName || "—"}\n💰 الإجمالي: ${grandTotal} ريال`;
 
   try {
     const blob = await generateReceiptPDFBlob(elementId);
     if (blob) {
-      const file = new File([blob], filename, { type: "application/pdf" });
+      const file = new File([blob], filename, {
+        type: "application/pdf",
+        lastModified: Date.now(),
+      });
 
       // Check if browser supports sharing files (Mobile devices & modern browsers)
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
           title: `فاتورة مبيعات #${invoiceNumber}`,
-          text: shareText,
         });
         return true;
       }
+
+      // Download file and open WhatsApp link
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        if (document.body.contains(link)) document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 3000);
     }
   } catch (err) {
     if (err.name !== "AbortError") {
-      console.warn("Native file share issue, falling back to WhatsApp link:", err);
+      console.warn("Native file share issue:", err);
     } else {
       return true; // User cancelled share sheet
     }
   }
 
-  // Fallback: Open WhatsApp with invoice summary
+  // Fallback: Open WhatsApp with invoice note
+  const shareText = `*فاتورة مبيعات - شركة الوفاء للمستلزمات*\n\n📄 رقم الفاتورة: #${invoiceNumber}\n👤 العميل: ${customerName || "—"}\n💰 الإجمالي: ${grandTotal} ريال\n(تم تنزيل ملف الفاتورة PDF)`;
   const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
   window.open(waUrl, "_blank");
   return true;
