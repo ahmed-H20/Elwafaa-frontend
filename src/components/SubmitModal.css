@@ -133,14 +133,51 @@
   cursor: not-allowed;
 }
 
-/* Primary PDF Button */
+/* Primary HTML View & Print Button */
 .btn-modal-primary {
   background: var(--teal-primary, #004f49);
   color: #ffffff;
   border: none;
   font-size: 14.5px;
   font-weight: 700;
-  padding: 11px 18px;
+  padding: 12px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 79, 73, 0.25);
+}
+
+.btn-modal-primary:hover:not(:disabled) {
+  background: var(--teal-dark, #003d38);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 79, 73, 0.35);
+}
+
+.btn-modal-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-modal-open-html {
+  background: linear-gradient(135deg, #135d66 0%, #0d3b41 100%);
+  border: 1px solid #d6b374;
+}
+
+.btn-modal-open-html:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0d3b41 0%, #07262a 100%);
+}
+
+.btn-modal-download-direct {
+  background: #ffffff;
+  color: #135d66;
+  border: 1.5px solid #135d66;
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 10px 16px;
   border-radius: 8px;
   cursor: pointer;
   display: flex;
@@ -150,13 +187,10 @@
   transition: all 0.2s;
 }
 
-.btn-modal-primary:hover:not(:disabled) {
-  background: var(--teal-dark, #003d38);
-}
-
-.btn-modal-primary:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+.btn-modal-download-direct:hover:not(:disabled) {
+  background: #f0fdfa;
+  border-color: #0d3b41;
+  color: #0d3b41;
 }
 
 .modal-actions-grid {

@@ -18,12 +18,14 @@ import {
   getCurrentDateFormatted,
 } from "../utils/arabicOrdinals";
 import { downloadReceiptPDF, shareReceiptOnWhatsApp } from "../utils/exportPdf";
+import { openInvoiceInBlankHtmlPage } from "../utils/exportHtml";
 import { initialSampleItems } from "../data/invoicesData";
 import {
   getInvoiceById,
   normalizeInvoice,
   downloadInvoicePDFFromServer,
   fetchInvoicePDFBlob,
+  openInvoiceHTMLView,
 } from "../APIs/invoicesAPI";
 import {
   getNextInvoiceNumber,
@@ -242,11 +244,9 @@ export default function ReceiptPage({
     setIsSubmitModalOpen(true);
   };
 
-  const handleDownloadPdf = async (idOverride) => {
+  const handleOpenHtmlView = async (autoPrint = false, idOverride) => {
     setIsGeneratingPdf(true);
     let targetId = idOverride || currentMongoId || searchParams.get("id");
-    const cleanName = customerName?.trim() ? `_${customerName.trim().replace(/\s+/g, "_")}` : "";
-    const fileName = `فاتورة_مبيعات_${invoiceNumber || "1"}${cleanName}.pdf`;
 
     try {
       // 1. Save/sync to get a server MongoDB ID if we don't have one yet
@@ -277,22 +277,62 @@ export default function ReceiptPage({
         }
       }
 
-      // 2. Open the server PDF URL directly in a new tab — works on ALL browsers including Chrome mobile
+      // 2. Open in blank HTML page with full invoice design and print/download controls
+      if (targetId && !String(targetId).startsWith("inv-")) {
+        openInvoiceHTMLView(targetId, autoPrint);
+      } else {
+        openInvoiceInBlankHtmlPage(
+          {
+            _id: targetId,
+            invoiceNumber,
+            customerName,
+            invoiceDate,
+            items,
+            tax,
+            total: grandTotal,
+          },
+          autoPrint
+        );
+      }
+    } catch (err) {
+      console.warn("Could not load from server, opening local HTML view:", err);
+      openInvoiceInBlankHtmlPage(
+        {
+          _id: targetId,
+          invoiceNumber,
+          customerName,
+          invoiceDate,
+          items,
+          tax,
+          total: grandTotal,
+        },
+        autoPrint
+      );
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const handleDownloadPdf = async (idOverride) => {
+    // Open in blank page HTML with invoice design and can download from it by print or download
+    await handleOpenHtmlView(false, idOverride);
+  };
+
+  const handleDirectDownloadPdf = async (idOverride) => {
+    setIsGeneratingPdf(true);
+    let targetId = idOverride || currentMongoId || searchParams.get("id");
+    const cleanName = customerName?.trim() ? `_${customerName.trim().replace(/\s+/g, "_")}` : "";
+    const fileName = `فاتورة_مبيعات_${invoiceNumber || "1"}${cleanName}.pdf`;
+
+    try {
       if (targetId && !String(targetId).startsWith("inv-")) {
         downloadInvoicePDFFromServer(targetId, fileName);
         return;
       }
-
-      // 3. Offline fallback: generate PDF client-side
       await downloadReceiptPDF("receipt-document", fileName);
     } catch (err) {
-      console.warn("PDF download failed:", err);
-      try {
-        await downloadReceiptPDF("receipt-document", fileName);
-      } catch (fallbackErr) {
-        console.error("PDF generation failed completely:", fallbackErr);
-        alert("حدث خطأ أثناء تنزيل ملف الـ PDF. يرجى المحاولة مرة أخرى.");
-      }
+      console.warn("Direct PDF download fallback:", err);
+      await downloadReceiptPDF("receipt-document", fileName);
     } finally {
       setIsGeneratingPdf(false);
     }
@@ -391,7 +431,10 @@ export default function ReceiptPage({
     if (receiptActionsRef) {
       receiptActionsRef.current = {
         submit: handleSubmitInvoice,
-        downloadPdf: handleDownloadPdf,
+        downloadPdf: () => handleOpenHtmlView(false),
+        print: () => handleOpenHtmlView(true),
+        openHtml: () => handleOpenHtmlView(false),
+        directDownloadPdf: handleDirectDownloadPdf,
         shareWhatsApp: handleShareWhatsApp,
       };
     }
@@ -521,7 +564,9 @@ export default function ReceiptPage({
         subtotal={subtotal}
         tax={tax}
         grandTotal={grandTotal}
+        onOpenHtmlView={() => handleOpenHtmlView(false)}
         onDownloadPdf={handleDownloadPdf}
+        onDirectDownloadPdf={handleDirectDownloadPdf}
         onShareWhatsApp={handleShareWhatsApp}
         onNewInvoice={handleResetNew}
         isGeneratingPdf={isGeneratingPdf}

@@ -222,3 +222,28 @@ export const fetchInvoicePDFBlob = async (id) => {
   }
   return await response.blob();
 };
+
+/**
+ * Opens the invoice in a new blank page/tab with complete HTML design,
+ * where the user can print it directly or download PDF from it.
+ *
+ * @param {string} id - MongoDB invoice _id
+ * @param {boolean} [autoPrint=false]
+ */
+export const openInvoiceHTMLView = (id, autoPrint = false) => {
+  if (!id) throw new Error("Invoice ID is required to open invoice HTML");
+  const url = `/api/v1/invoices/${id}/view${autoPrint ? "?print=true" : ""}`;
+
+  const win = window.open(url, "_blank");
+  if (!win || win.closed || typeof win.closed === "undefined") {
+    const a = document.createElement("a");
+    a.href = url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      if (document.body.contains(a)) document.body.removeChild(a);
+    }, 500);
+  }
+};

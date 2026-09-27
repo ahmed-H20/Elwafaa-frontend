@@ -10,6 +10,7 @@ import {
   ExternalLink,
   ShieldAlert,
   ShieldCheck,
+  Printer,
 } from "lucide-react";
 import "./AdminDashboard.css";
 
@@ -263,11 +264,35 @@ export default function AdminDashboard({
                   {/* Action Link: View → & Delete */}
                   <td className="action-cell">
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 6 }}>
+                      <a
+                        href={`/api/v1/invoices/${inv.id || inv._id}/view`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="فتح الفاتورة في صفحة HTML مستقلة للطباعة والتنزيل"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
+                          padding: "6px 9px",
+                          borderRadius: "6px",
+                          backgroundColor: "#f0fdfa",
+                          color: "#135d66",
+                          border: "1px solid #99f6e4",
+                          textDecoration: "none",
+                          fontSize: 12,
+                          fontWeight: 700,
+                          transition: "all 0.2s",
+                        }}
+                      >
+                        <Printer size={13} />
+                        <span>طباعة / HTML</span>
+                      </a>
+
                       <button
                         type="button"
                         className="btn-view-invoice"
                         onClick={() => onViewInvoice(inv)}
-                        title="عرض وطباعة هذه الفاتورة"
+                        title="عرض وتعديل هذه الفاتورة"
                       >
                         <span>View</span>
                         <ArrowRight size={14} />
