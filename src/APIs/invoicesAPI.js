@@ -182,59 +182,30 @@ export const fetchNormalizedInvoices = async () => {
 };
 
 /**
- * Downloads the high-resolution invoice PDF generated directly by the server (Puppeteer)
+ * Downloads the invoice PDF directly from the server.
+ *
+ * Strategy (most reliable across all browsers including Chrome mobile):
+ * - Navigate directly to the server PDF endpoint using an <a> tag with the real URL.
+ * - The server sends Content-Disposition: attachment, so browsers download the file.
+ * - Blob URLs are NOT used because Chrome on Android blocks them.
  *
  * @param {string} id - MongoDB invoice _id
  * @param {string} [filename]
- * @returns {Promise<Blob>}
  */
 export const downloadInvoicePDFFromServer = async (id, filename) => {
   if (!id) throw new Error("Invoice ID is required for server PDF download");
-  const safeFilename = filename || `فاتورة_مبيعات_${id}.pdf`;
   const pdfUrl = `/api/v1/invoices/${id}/pdf`;
 
-  const isMobile =
-    window.innerWidth <= 860 ||
-    /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
-
-  const response = await fetch(pdfUrl);
-  if (!response.ok) {
-    throw new Error(`Server returned ${response.status}: Failed to generate PDF`);
-  }
-
-  const blob = await response.blob();
-  const blobUrl = URL.createObjectURL(blob);
-
-  // 1. Trigger direct file download
+  // Use a real link to the server URL — works on Chrome, Safari, Firefox, mobile
   const a = document.createElement("a");
-  a.href = blobUrl;
-  a.download = safeFilename;
-  a.style.display = "none";
+  a.href = pdfUrl;
+  a.target = "_blank";         // opens in new tab (shows PDF on mobile Chrome)
+  a.rel = "noopener noreferrer";
   document.body.appendChild(a);
   a.click();
-
-  // 2. In mobile view, also open the PDF in a new tab/page
-  if (isMobile) {
-    const newWindow = window.open(blobUrl, "_blank");
-    if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
-      // If popup blocker intervened, open direct URL in new tab
-      window.open(pdfUrl, "_blank");
-    }
-  }
-
-  // Cleanup after giving enough time for mobile tab to read blob
   setTimeout(() => {
-    if (document.body.contains(a)) {
-      document.body.removeChild(a);
-    }
-    if (!isMobile) {
-      URL.revokeObjectURL(blobUrl);
-    }
-  }, 5000);
-
-  return blob;
+    if (document.body.contains(a)) document.body.removeChild(a);
+  }, 500);
 };
 
 /**
@@ -251,4 +222,3 @@ export const fetchInvoicePDFBlob = async (id) => {
   }
   return await response.blob();
 };
-

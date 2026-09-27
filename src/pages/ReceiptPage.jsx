@@ -249,43 +249,44 @@ export default function ReceiptPage({
     const fileName = `فاتورة_مبيعات_${invoiceNumber || "1"}${cleanName}.pdf`;
 
     try {
-      // 1. Sync latest changes to server first so PDF includes all updated items
-      const saveFn = onSaveInvoice || onSaveNewInvoice;
-      if (saveFn) {
-        const clientInitials = customerName
-          ? customerName.split(" ").filter(Boolean).map((n) => n[0]).join("").slice(0, 2).toUpperCase()
-          : "CL";
-        const finalRawNum = invoiceNumber?.trim() || getNextInvoiceNumber(invoicesList);
-        const formattedInvNum = formatInvoiceNumber(finalRawNum);
-        const saved = await saveFn({
-          _id: currentMongoId,
-          id: currentMongoId || `inv-${Date.now()}`,
-          clientName: customerName || `عميل #${finalRawNum}`,
-          invoiceNumber: formattedInvNum,
-          avatarLetters: clientInitials,
-          avatarClass: "avatar-default",
-          total: Math.round(grandTotal),
-          tax: tax,
-          date: invoiceDate,
-          items: items,
-        });
-
-        if (saved?._id) {
-          targetId = saved._id;
-          setCurrentMongoId(saved._id);
+      // 1. Save/sync to get a server MongoDB ID if we don't have one yet
+      if (!targetId || String(targetId).startsWith("inv-")) {
+        const saveFn = onSaveInvoice || onSaveNewInvoice;
+        if (saveFn) {
+          const clientInitials = customerName
+            ? customerName.split(" ").filter(Boolean).map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+            : "CL";
+          const finalRawNum = invoiceNumber?.trim() || getNextInvoiceNumber(invoicesList);
+          const formattedInvNum = formatInvoiceNumber(finalRawNum);
+          const saved = await saveFn({
+            _id: currentMongoId,
+            id: currentMongoId || `inv-${Date.now()}`,
+            clientName: customerName || `عميل #${finalRawNum}`,
+            invoiceNumber: formattedInvNum,
+            avatarLetters: clientInitials,
+            avatarClass: "avatar-default",
+            total: Math.round(grandTotal),
+            tax: tax,
+            date: invoiceDate,
+            items: items,
+          });
+          if (saved?._id) {
+            targetId = saved._id;
+            setCurrentMongoId(saved._id);
+          }
         }
       }
 
-      // 2. Download high-resolution server-generated PDF
+      // 2. Open the server PDF URL directly in a new tab — works on ALL browsers including Chrome mobile
       if (targetId && !String(targetId).startsWith("inv-")) {
-        await downloadInvoicePDFFromServer(targetId, fileName);
+        downloadInvoicePDFFromServer(targetId, fileName);
         return;
       }
 
-      // 3. Fallback to client-side PDF file download if offline
+      // 3. Offline fallback: generate PDF client-side
       await downloadReceiptPDF("receipt-document", fileName);
     } catch (err) {
-      console.warn("Server PDF download failed, falling back to client-side PDF:", err);
+      console.warn("PDF download failed:", err);
       try {
         await downloadReceiptPDF("receipt-document", fileName);
       } catch (fallbackErr) {
@@ -302,44 +303,46 @@ export default function ReceiptPage({
     let targetId = currentMongoId || searchParams.get("id");
     const cleanName = customerName?.trim() ? `_${customerName.trim().replace(/\s+/g, "_")}` : "";
     const filename = `فاتورة_مبيعات_${invoiceNumber || "1"}${cleanName}.pdf`;
+    const shareText = `*فاتورة مبيعات - شركة الوفاء للمستلزمات*\n\n📄 رقم الفاتورة: #${invoiceNumber}\n👤 العميل: ${customerName || "—"}\n💰 الإجمالي: ${grandTotal.toFixed(2)} ريال`;
 
     try {
-      // 1. Ensure latest invoice changes are saved/synced to server to get MongoDB ID
-      const saveFn = onSaveInvoice || onSaveNewInvoice;
-      if (saveFn) {
-        const clientInitials = customerName
-          ? customerName.split(" ").filter(Boolean).map((n) => n[0]).join("").slice(0, 2).toUpperCase()
-          : "CL";
-        const finalRawNum = invoiceNumber?.trim() || getNextInvoiceNumber(invoicesList);
-        const formattedInvNum = formatInvoiceNumber(finalRawNum);
-        const saved = await saveFn({
-          _id: currentMongoId,
-          id: currentMongoId || `inv-${Date.now()}`,
-          clientName: customerName || `عميل #${finalRawNum}`,
-          invoiceNumber: formattedInvNum,
-          avatarLetters: clientInitials,
-          avatarClass: "avatar-default",
-          total: Math.round(grandTotal),
-          tax: tax,
-          date: invoiceDate,
-          items: items,
-        });
-        if (saved?._id) {
-          targetId = saved._id;
-          setCurrentMongoId(saved._id);
+      // 1. Save/sync to get a MongoDB ID if needed
+      if (!targetId || String(targetId).startsWith("inv-")) {
+        const saveFn = onSaveInvoice || onSaveNewInvoice;
+        if (saveFn) {
+          const clientInitials = customerName
+            ? customerName.split(" ").filter(Boolean).map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+            : "CL";
+          const finalRawNum = invoiceNumber?.trim() || getNextInvoiceNumber(invoicesList);
+          const formattedInvNum = formatInvoiceNumber(finalRawNum);
+          const saved = await saveFn({
+            _id: currentMongoId,
+            id: currentMongoId || `inv-${Date.now()}`,
+            clientName: customerName || `عميل #${finalRawNum}`,
+            invoiceNumber: formattedInvNum,
+            avatarLetters: clientInitials,
+            avatarClass: "avatar-default",
+            total: Math.round(grandTotal),
+            tax: tax,
+            date: invoiceDate,
+            items: items,
+          });
+          if (saved?._id) {
+            targetId = saved._id;
+            setCurrentMongoId(saved._id);
+          }
         }
       }
 
-      // 2. Fetch the exact server PDF blob (or generate high-res client fallback)
+      // 2. Fetch PDF blob from server (or generate client-side)
       let pdfBlob = null;
       if (targetId && !String(targetId).startsWith("inv-")) {
         try {
           pdfBlob = await fetchInvoicePDFBlob(targetId);
-        } catch (serverBlobErr) {
-          console.warn("Could not fetch server PDF blob, using client generator:", serverBlobErr);
+        } catch (e) {
+          console.warn("Server PDF blob failed, using client generator:", e);
         }
       }
-
       if (!pdfBlob) {
         pdfBlob = await generateReceiptPDFBlob("receipt-document");
       }
@@ -350,38 +353,33 @@ export default function ReceiptPage({
           lastModified: Date.now(),
         });
 
-        // 3. If Mobile / Web Share API with files is supported, share the PDF file directly
-        if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-          await navigator.share({
-            files: [pdfFile],
-            title: `فاتورة مبيعات #${invoiceNumber}`,
-          });
-          return;
+        // 3. Web Share API (works on Chrome Android, Safari iOS)
+        // IMPORTANT: navigator.share must be called here — still within the user-gesture chain
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+          try {
+            await navigator.share({
+              files: [pdfFile],
+              title: `فاتورة مبيعات #${invoiceNumber}`,
+              text: shareText,
+            });
+            return;
+          } catch (shareErr) {
+            if (shareErr.name === "AbortError") return; // user cancelled
+            console.warn("navigator.share failed:", shareErr);
+          }
         }
-
-        // 4. Desktop fallback: automatically download the PDF file and open WhatsApp
-        const blobUrl = URL.createObjectURL(pdfBlob);
-        const a = document.createElement("a");
-        a.href = blobUrl;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-          if (document.body.contains(a)) document.body.removeChild(a);
-          URL.revokeObjectURL(blobUrl);
-        }, 3000);
-
-        const waText = encodeURIComponent(
-          `مرفق ملف فاتورة مبيعات رقم #${invoiceNumber} للعميل: ${customerName || "—"}\n(تم تنزيل ملف الـ PDF ويمكنك إرفاقه بالمحادثة الآن)`
-        );
-        const waUrl = `https://api.whatsapp.com/send?text=${waText}`;
-        window.open(waUrl, "_blank");
-        return;
       }
+
+      // 4. Fallback for desktop / unsupported: open WhatsApp with text
+      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+      window.open(waUrl, "_blank");
+
     } catch (err) {
       if (err.name !== "AbortError") {
-        console.error("PDF Share failed:", err);
-        alert("تعذر مشاركة ملف الـ PDF. يرجى المحاولة مرة أخرى أو استخدام زر تحميل PDF.");
+        console.error("Share failed:", err);
+        // Last-resort: open WhatsApp with text
+        const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+        window.open(waUrl, "_blank");
       }
     } finally {
       setIsGeneratingPdf(false);

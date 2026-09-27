@@ -64,36 +64,35 @@ export async function generateReceiptPDFBlob(elementId = "receipt-document") {
  */
 export async function downloadReceiptPDF(elementId = "receipt-document", filename = "فاتورة_مبيعات.pdf") {
   const blob = await generateReceiptPDFBlob(elementId);
-  if (blob) {
-    const url = URL.createObjectURL(blob);
+  if (!blob) return false;
+
+  const isMobile =
+    /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+
+  const url = URL.createObjectURL(blob);
+
+  if (isMobile) {
+    // On mobile Chrome: open in new tab so user can use the browser's built-in
+    // "Download" / "Share" button from the PDF viewer — blob download doesn't work
+    window.open(url, "_blank");
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } else {
+    // Desktop: standard anchor download
     const link = document.createElement("a");
     link.href = url;
     link.download = filename;
+    link.style.display = "none";
     document.body.appendChild(link);
     link.click();
-
-    const isMobile =
-      window.innerWidth <= 860 ||
-      /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      );
-
-    if (isMobile) {
-      window.open(url, "_blank");
-    }
-
     setTimeout(() => {
-      if (document.body.contains(link)) {
-        document.body.removeChild(link);
-      }
-      if (!isMobile) {
-        URL.revokeObjectURL(url);
-      }
-    }, 5000);
-    return true;
+      if (document.body.contains(link)) document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }, 3000);
   }
 
-  return false;
+  return true;
 }
 
 /**
