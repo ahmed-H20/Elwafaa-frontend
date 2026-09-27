@@ -182,3 +182,43 @@ export const fetchNormalizedInvoices = async () => {
   return [];
 };
 
+/**
+ * Downloads the high-resolution invoice PDF generated directly by the server (Puppeteer)
+ *
+ * @param {string} id - MongoDB invoice _id
+ * @param {string} [filename]
+ * @returns {Promise<Blob>}
+ */
+export const downloadInvoicePDFFromServer = async (id, filename) => {
+  if (!id) throw new Error("Invoice ID is required for server PDF download");
+  const response = await fetch(`/api/v1/invoices/${id}/pdf`);
+  if (!response.ok) {
+    throw new Error(`Server returned ${response.status}: Failed to generate PDF`);
+  }
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename || `فاتورة_مبيعات_${id}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  return blob;
+};
+
+/**
+ * Fetches the raw PDF Blob from the server for WhatsApp sharing or local processing
+ *
+ * @param {string} id - MongoDB invoice _id
+ * @returns {Promise<Blob>}
+ */
+export const fetchInvoicePDFBlob = async (id) => {
+  if (!id) throw new Error("Invoice ID is required for server PDF");
+  const response = await fetch(`/api/v1/invoices/${id}/pdf`);
+  if (!response.ok) {
+    throw new Error(`Server returned ${response.status}: Failed to generate PDF`);
+  }
+  return await response.blob();
+};
+

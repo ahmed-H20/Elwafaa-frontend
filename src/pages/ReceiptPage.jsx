@@ -17,9 +17,14 @@ import {
   getItemNameByIndex,
   getCurrentDateFormatted,
 } from "../utils/arabicOrdinals";
-import { downloadReceiptPDF } from "../utils/exportPdf";
+import { downloadReceiptPDF, shareReceiptOnWhatsApp } from "../utils/exportPdf";
 import { initialSampleItems } from "../data/invoicesData";
-import { getInvoiceById, normalizeInvoice } from "../APIs/invoicesAPI";
+import {
+  getInvoiceById,
+  normalizeInvoice,
+  downloadInvoicePDFFromServer,
+  fetchInvoicePDFBlob,
+} from "../APIs/invoicesAPI";
 import {
   getNextInvoiceNumber,
   formatInvoiceNumber,
@@ -44,10 +49,11 @@ export default function ReceiptPage({
 
   // Receipt manual states
   const [customerName, setCustomerName] = useState("");
-  const [tax, setTax] = useState("0.00");
+  const [tax, setTax] = useState("0");
   const [invoiceNumber, setInvoiceNumber] = useState(() => getNextInvoiceNumber(invoicesList));
   const [invoiceDate, setInvoiceDate] = useState(getCurrentDateFormatted());
-  const [items, setItems] = useState(initialSampleItems);
+  const [items, setItems] = useState([]);
+  const [currentMongoId, setCurrentMongoId] = useState(null);
 
   // Logo & Badge Theme customization states
   const [badgeTheme, setBadgeTheme] = useState("white"); // "white" | "dark"
@@ -58,20 +64,42 @@ export default function ReceiptPage({
   const [isMobile, setIsMobile] = useState(false);
   const previewContainerRef = useRef(null);
 
+  const handleLoadSample = () => {
+    setCustomerName("");
+    setTax("0");
+    setInvoiceNumber(getNextInvoiceNumber(invoicesList));
+    setInvoiceDate(getCurrentDateFormatted());
+    setItems([]);
+    setCurrentMongoId(null);
+  };
+
+  const handleResetNew = () => {
+    setCustomerName("");
+    setTax("0");
+    setInvoiceNumber(getNextInvoiceNumber(invoicesList));
+    setInvoiceDate(getCurrentDateFormatted());
+    setItems([]);
+    setCurrentMongoId(null);
+  };
+
   // Load invoice from URL ?id=... or ?new=true
   useEffect(() => {
     const invId = searchParams.get("id");
     const isNew = searchParams.get("new");
 
     if (invId) {
+      setCurrentMongoId(invId);
       const found = invoicesList.find((i) => i.id === invId || i._id === invId);
       if (found) {
         setCustomerName(found.clientName || found.name || "");
         setInvoiceNumber(found.invoiceNumber?.replace("INV-", "") || "1");
         setInvoiceDate(found.date || getCurrentDateFormatted());
-        setTax(found.tax != null ? String(found.tax) : "0.00");
+        setTax(found.tax != null ? String(found.tax) : "0");
         if (found.items && found.items.length > 0) {
           setItems(found.items);
+        }
+        if (found._id) {
+          setCurrentMongoId(found._id);
         }
         setActiveMobileTab("preview");
         return;
@@ -86,9 +114,12 @@ export default function ReceiptPage({
               setCustomerName(normalized.clientName || "");
               setInvoiceNumber(normalized.invoiceNumber?.replace("INV-", "") || "1");
               setInvoiceDate(normalized.date || getCurrentDateFormatted());
-              setTax(String(normalized.tax || "0.00"));
+              setTax(String(normalized.tax || "0"));
               if (normalized.items?.length > 0) {
                 setItems(normalized.items);
+              }
+              if (normalized._id) {
+                setCurrentMongoId(normalized._id);
               }
               setActiveMobileTab("preview");
             }
@@ -98,17 +129,11 @@ export default function ReceiptPage({
           });
         return;
       }
-    }
-
-    if (isNew) {
+    } else if (isNew) {
       handleResetNew();
       setActiveMobileTab("form");
-      return;
     }
-
-    // Default: load initial sample
-    handleLoadSample();
-  }, [searchParams, invoicesList]);
+  }, [searchParams]);
 
   // Responsive mobile measurement
   useEffect(() => {
@@ -144,12 +169,11 @@ export default function ReceiptPage({
   // Handlers
   const handleAddItem = () => {
     const nextIndex = items.length;
-    const autoName = getItemNameByIndex(nextIndex);
     const newItem = {
       id: `item-${Date.now()}-${nextIndex}`,
-      name: autoName,
+      name: '',
       quantity: 1,
-      price: 10.0,
+      price: 0,
     };
     setItems((prev) => [...prev, newItem]);
   };
@@ -169,28 +193,7 @@ export default function ReceiptPage({
     );
   };
 
-  const handleLoadSample = () => {
-    setCustomerName("");
-    setTax("0.00");
-    setInvoiceNumber(getNextInvoiceNumber(invoicesList));
-    setInvoiceDate(getCurrentDateFormatted());
-    setItems(initialSampleItems);
-  };
 
-  const handleResetNew = () => {
-    setCustomerName("");
-    setTax("0.00");
-    setInvoiceNumber(getNextInvoiceNumber(invoicesList));
-    setInvoiceDate(getCurrentDateFormatted());
-    setItems([
-      {
-        id: `item-${Date.now()}-0`,
-        name: getItemNameByIndex(0),
-        quantity: 1,
-        price: 10.0,
-      },
-    ]);
-  };
 
   const handleSubmitInvoice = async () => {
     confetti({
@@ -224,37 +227,111 @@ export default function ReceiptPage({
       items: items,
     };
 
+    let savedRecord = null;
     if (onSaveNewInvoice) {
-      await onSaveNewInvoice(newInvoiceRecord);
+      savedRecord = await onSaveNewInvoice(newInvoiceRecord);
+      if (savedRecord?._id) {
+        setCurrentMongoId(savedRecord._id);
+      }
     }
-
-    // Automatically prepare next sequential invoice number for next invoice
-    const nextNum = getNextInvoiceNumber([...invoicesList, newInvoiceRecord]);
-    setInvoiceNumber(nextNum);
 
     setIsSubmitModalOpen(true);
 
-    // Automatically trigger PDF download when submitting/saving invoice
+    // Automatically trigger PDF download from server when submitting/saving invoice
+    const targetMongoId = savedRecord?._id || currentMongoId;
     setTimeout(() => {
-      handleDownloadPdf();
+      handleDownloadPdf(targetMongoId);
     }, 0);
   };
 
-  const handleDownloadPdf = async () => {
+  const handleDownloadPdf = async (idOverride) => {
     setIsGeneratingPdf(true);
+    const targetId = idOverride || currentMongoId || searchParams.get("id");
+    const fileName = `فاتورة_مبيعات_${customerName || invoiceNumber}.pdf`;
+
     try {
-      const fileName = `فاتورة_مبيعات_${customerName}.pdf`;
+      // 1. Try server-side Puppeteer PDF generation if invoice exists on server
+      if (targetId && !String(targetId).startsWith("inv-")) {
+        await downloadInvoicePDFFromServer(targetId, fileName);
+        return;
+      }
+
+      // 2. If not saved on server yet, save first to get Mongo ID and generate server PDF
+      if (onSaveNewInvoice) {
+        const clientInitials = customerName
+          ? customerName.split(" ").filter(Boolean).map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+          : "CL";
+        const finalRawNum = invoiceNumber?.trim() || getNextInvoiceNumber(invoicesList);
+        const formattedInvNum = formatInvoiceNumber(finalRawNum);
+        const saved = await onSaveNewInvoice({
+          id: `inv-${Date.now()}`,
+          clientName: customerName || `عميل #${finalRawNum}`,
+          invoiceNumber: formattedInvNum,
+          avatarLetters: clientInitials,
+          avatarClass: "avatar-default",
+          total: Math.round(grandTotal),
+          tax: tax,
+          date: invoiceDate,
+          items: items,
+        });
+
+        if (saved?._id) {
+          setCurrentMongoId(saved._id);
+          await downloadInvoicePDFFromServer(saved._id, fileName);
+          return;
+        }
+      }
+
+      // 3. Fallback to client-side PDF if offline
       await downloadReceiptPDF("receipt-document", fileName);
     } catch (err) {
-      console.error("PDF generation failed:", err);
-      alert("حدث خطأ أثناء تنزيل ملف الـ PDF. يرجى المحاولة مرة أخرى.");
+      console.warn("Server PDF generation failed, falling back to client-side PDF:", err);
+      try {
+        await downloadReceiptPDF("receipt-document", fileName);
+      } catch (fallbackErr) {
+        console.error("PDF generation failed completely:", fallbackErr);
+        alert("حدث خطأ أثناء تنزيل ملف الـ PDF. يرجى المحاولة مرة أخرى.");
+      }
     } finally {
       setIsGeneratingPdf(false);
     }
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handleShareWhatsApp = async () => {
+    setIsGeneratingPdf(true);
+    const targetId = currentMongoId || searchParams.get("id");
+    const cleanName = customerName?.trim() ? `_${customerName.trim().replace(/\s+/g, "_")}` : "";
+    const filename = `فاتورة_مبيعات_${invoiceNumber}${cleanName}.pdf`;
+    const shareText = `*فاتورة مبيعات - شركة الوفاء للمستلزمات*\n\n📄 رقم الفاتورة: #${invoiceNumber}\n👤 العميل: ${customerName || "—"}\n💰 الإجمالي: ${grandTotal} ريال`;
+
+    try {
+      if (targetId && !String(targetId).startsWith("inv-")) {
+        const blob = await fetchInvoicePDFBlob(targetId);
+        if (blob) {
+          const file = new File([blob], filename, { type: "application/pdf" });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: `فاتورة مبيعات #${invoiceNumber}`,
+              text: shareText,
+            });
+            return;
+          }
+        }
+      }
+
+      // Fallback
+      await shareReceiptOnWhatsApp({
+        invoiceNumber,
+        customerName,
+        grandTotal,
+        elementId: "receipt-document",
+      });
+    } catch (err) {
+      console.error("WhatsApp share failed:", err);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
   };
 
   // Register actions to ref for Navbar triggers
@@ -263,7 +340,7 @@ export default function ReceiptPage({
       receiptActionsRef.current = {
         submit: handleSubmitInvoice,
         downloadPdf: handleDownloadPdf,
-        // print: handlePrint,
+        shareWhatsApp: handleShareWhatsApp,
       };
     }
   });
@@ -272,18 +349,15 @@ export default function ReceiptPage({
   useEffect(() => {
     const onPdf = () => handleDownloadPdf();
     const onSubmit = () => handleSubmitInvoice();
-    const onPrint = () => handlePrint();
 
     window.addEventListener("alwafaa:download-pdf", onPdf);
     window.addEventListener("alwafaa:submit", onSubmit);
-    window.addEventListener("alwafaa:print", onPrint);
 
     return () => {
       window.removeEventListener("alwafaa:download-pdf", onPdf);
       window.removeEventListener("alwafaa:submit", onSubmit);
-      window.removeEventListener("alwafaa:print", onPrint);
     };
-  }, [handleSubmitInvoice, handleDownloadPdf, handlePrint]);
+  }, [handleSubmitInvoice, handleDownloadPdf,]);
 
   return (
     <div className="receipt-page-container">
@@ -337,7 +411,6 @@ export default function ReceiptPage({
             setLogoChoice={setLogoChoice}
             onSubmit={handleSubmitInvoice}
             onDownloadPdf={handleDownloadPdf}
-            onPrint={handlePrint}
             onLoadSample={handleLoadSample}
             onResetNew={handleResetNew}
             isGeneratingPdf={isGeneratingPdf}
@@ -439,7 +512,7 @@ export default function ReceiptPage({
         tax={tax}
         grandTotal={grandTotal}
         onDownloadPdf={handleDownloadPdf}
-        onPrint={handlePrint}
+        onShareWhatsApp={handleShareWhatsApp}
         onNewInvoice={handleResetNew}
         isGeneratingPdf={isGeneratingPdf}
       />

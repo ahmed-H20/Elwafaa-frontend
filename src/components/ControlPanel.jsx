@@ -70,7 +70,7 @@ export default function ControlPanel({
       </div>
 
       {/* Brand & Badge Customization Section */}
-      <section className="form-section">
+      {/* <section className="form-section">
         <div className="section-label">
           <span>شعار وهوية الفاتورة</span>
           <span className="badge-tag auto">هوية الشعار</span>
@@ -101,7 +101,7 @@ export default function ControlPanel({
             </select>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Invoice Meta Section */}
       <section className="form-section">
@@ -116,12 +116,11 @@ export default function ControlPanel({
               <User size={13} style={{ display: "inline", verticalAlign: "middle", marginLeft: 4 }} />
               اسم العميل
             </span>
-            <span className="badge-tag manual">يدوي</span>
           </label>
           <input
             type="text"
             className="input-field"
-            placeholder="أدخل اسم العميل (يدوياً)..."
+            placeholder="أدخل اسم العميل"
             value={customerName}
             onChange={(e) => setCustomerName(e.target.value)}
           />
@@ -172,12 +171,12 @@ export default function ControlPanel({
           </label>
           <input
             type="number"
-            step="0.01"
+            step="any"
             min="0"
             className="input-field"
             value={tax}
             onChange={(e) => setTax(e.target.value)}
-            placeholder="0.00"
+            placeholder="0"
           />
         </div>
       </section>
@@ -212,7 +211,7 @@ export default function ControlPanel({
                 {/* Description (البيان تلقائي) */}
                 <div className="input-group">
                   <label className="input-label" style={{ fontSize: 11 }}>
-                    البيان (تلقائي)
+                    البيان
                   </label>
                   <input
                     type="text"
@@ -227,7 +226,7 @@ export default function ControlPanel({
                   {/* Manual Quantity (الكمية يدوي) */}
                   <div className="input-group">
                     <label className="input-label" style={{ fontSize: 11 }}>
-                      الكمية (يدوي)
+                      الكمية
                     </label>
                     <input
                       type="number"
@@ -241,7 +240,7 @@ export default function ControlPanel({
                   {/* Manual Price (السعر يدوي) */}
                   <div className="input-group">
                     <label className="input-label" style={{ fontSize: 11 }}>
-                      السعر (يدوي)
+                      السعر
                     </label>
                     <input
                       type="number"
@@ -301,9 +300,9 @@ export default function ControlPanel({
           onClick={onSubmit}
         >
           <CheckCircle2 size={19} />
-          اعتماد وحفظ الفاتورة (Submit)
+          اعتماد وحفظ الفاتورة
         </button>
-
+        {/* 
         <div className="actions-row-secondary">
           <button
             type="button"
@@ -314,16 +313,7 @@ export default function ControlPanel({
             <FileDown size={16} />
             {isGeneratingPdf ? "جاري التجهيز..." : "تحميل PDF"}
           </button>
-
-          <button
-            type="button"
-            className="btn-print"
-            onClick={onPrint}
-          >
-            <Printer size={16} />
-            طباعة
-          </button>
-        </div>
+        </div> */}
       </div>
     </aside>
   );

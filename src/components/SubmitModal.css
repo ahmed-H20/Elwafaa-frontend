@@ -18,11 +18,11 @@
   border-radius: 16px;
   max-width: 480px;
   width: 100%;
-  padding: 28px;
+  padding: 26px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
   text-align: center;
   animation: slideUp 0.25s ease-out;
 }
@@ -44,8 +44,8 @@
 }
 
 .modal-icon-badge {
-  width: 64px;
-  height: 64px;
+  width: 60px;
+  height: 60px;
   background-color: var(--teal-light, #e6f7f5);
   color: var(--teal-accent, #33ada0);
   border-radius: 50%;
@@ -56,25 +56,25 @@
 }
 
 .modal-title {
-  font-size: 22px;
+  font-size: 21px;
   font-weight: 800;
   color: var(--teal-primary, #004f49);
 }
 
 .modal-subtitle {
-  font-size: 14px;
+  font-size: 13.5px;
   color: #64748b;
-  margin-top: -12px;
+  margin-top: -10px;
 }
 
 .modal-summary-box {
   background-color: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 16px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   text-align: right;
 }
 
@@ -82,14 +82,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 14px;
+  font-size: 13.5px;
   color: #475569;
 }
 
 .summary-item.highlight {
   border-top: 1.5px dashed #cbd5e1;
-  padding-top: 10px;
-  font-size: 17px;
+  padding-top: 8px;
+  font-size: 16px;
   font-weight: 800;
   color: var(--teal-primary, #004f49);
 }
@@ -97,16 +97,50 @@
 .modal-actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 9px;
 }
 
+/* WhatsApp Share Button */
+.btn-modal-whatsapp {
+  background: #25D366;
+  color: #ffffff;
+  border: none;
+  font-size: 14.5px;
+  font-weight: 700;
+  padding: 12px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.28);
+}
+
+.btn-modal-whatsapp:hover:not(:disabled) {
+  background: #20ba5a;
+  box-shadow: 0 6px 16px rgba(37, 211, 102, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-modal-whatsapp:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-modal-whatsapp:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Primary PDF Button */
 .btn-modal-primary {
   background: var(--teal-primary, #004f49);
   color: #ffffff;
   border: none;
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 700;
-  padding: 12px 18px;
+  padding: 11px 18px;
   border-radius: 8px;
   cursor: pointer;
   display: flex;
@@ -116,14 +150,19 @@
   transition: all 0.2s;
 }
 
-.btn-modal-primary:hover {
+.btn-modal-primary:hover:not(:disabled) {
   background: var(--teal-dark, #003d38);
+}
+
+.btn-modal-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .modal-actions-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 9px;
 }
 
 .btn-modal-secondary {
@@ -144,4 +183,14 @@
 
 .btn-modal-secondary:hover {
   background: #e2e8f0;
+}
+
+.btn-new-invoice {
+  color: var(--teal-primary, #004f49);
+  border-color: #94d3cc;
+  background: #f0fdfc;
+}
+
+.btn-new-invoice:hover {
+  background: #ccfbf1;
 }

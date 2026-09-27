@@ -12,7 +12,7 @@ export default function Receipt({
   tax = 0,
   subtotal = 0,
   grandTotal = 0,
-  minRows = 7,
+  minRows = 1,
   companyName = "شركة الوفاء للمستلزمات",
   title = "فاتورة مبيعات",
   phone = "0582076406",
@@ -23,8 +23,8 @@ export default function Receipt({
   badgeTheme = "white", // "white" | "dark"
 }) {
   // Pad with dashed rows if items count is less than minRows (exactly like the image)
-  const emptyRowsCount = Math.max(0, minRows - items.length);
-  const emptyRows = Array.from({ length: emptyRowsCount }, (_, i) => i);
+
+  const emptyRows = [];
 
   return (
     <div className="receipt-wrapper">
@@ -133,7 +133,7 @@ export default function Receipt({
                 <div className="total-label-stacked">
                   <span>الضريبة</span>
                 </div>
-                <div className="total-val">{formatCurrency(tax)}</div>
+                <div className="total-val">{tax !== "" && tax != null ? `% ${tax}` : "% 0"}</div>
               </div>
 
               {/* Row 3: Grand Total (Tan Highlight) */}
