@@ -235,13 +235,8 @@ export default function ReceiptPage({
       }
     }
 
+    // Open confirmation modal (NO automatic download or print)
     setIsSubmitModalOpen(true);
-
-    // Automatically trigger PDF download from server when submitting/saving invoice
-    const targetMongoId = savedRecord?._id || currentMongoId;
-    setTimeout(() => {
-      handleDownloadPdf(targetMongoId);
-    }, 0);
   };
 
   const handleDownloadPdf = async (idOverride) => {
@@ -299,12 +294,39 @@ export default function ReceiptPage({
 
   const handleShareWhatsApp = async () => {
     setIsGeneratingPdf(true);
-    const targetId = currentMongoId || searchParams.get("id");
+    let targetId = currentMongoId || searchParams.get("id");
     const cleanName = customerName?.trim() ? `_${customerName.trim().replace(/\s+/g, "_")}` : "";
     const filename = `فاتورة_مبيعات_${invoiceNumber}${cleanName}.pdf`;
-    const shareText = `*فاتورة مبيعات - شركة الوفاء للمستلزمات*\n\n📄 رقم الفاتورة: #${invoiceNumber}\n👤 العميل: ${customerName || "—"}\n💰 الإجمالي: ${grandTotal} ريال`;
+    const shareText = `*فاتورة مبيعات - شركة الوفاء للمستلزمات*\n\n📄 رقم الفاتورة: #${invoiceNumber}\n👤 العميل: ${customerName || "—"}\n💰 الإجمالي: ${grandTotal.toFixed(2)} ريال`;
 
     try {
+      // 1. Ensure invoice is saved to server to get MongoDB ID
+      if (!targetId || String(targetId).startsWith("inv-")) {
+        if (onSaveNewInvoice) {
+          const clientInitials = customerName
+            ? customerName.split(" ").filter(Boolean).map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+            : "CL";
+          const finalRawNum = invoiceNumber?.trim() || getNextInvoiceNumber(invoicesList);
+          const formattedInvNum = formatInvoiceNumber(finalRawNum);
+          const saved = await onSaveNewInvoice({
+            id: `inv-${Date.now()}`,
+            clientName: customerName || `عميل #${finalRawNum}`,
+            invoiceNumber: formattedInvNum,
+            avatarLetters: clientInitials,
+            avatarClass: "avatar-default",
+            total: Math.round(grandTotal),
+            tax: tax,
+            date: invoiceDate,
+            items: items,
+          });
+          if (saved?._id) {
+            targetId = saved._id;
+            setCurrentMongoId(saved._id);
+          }
+        }
+      }
+
+      // 2. Fetch the exact server Puppeteer PDF file and share it
       if (targetId && !String(targetId).startsWith("inv-")) {
         const blob = await fetchInvoicePDFBlob(targetId);
         if (blob) {
@@ -320,7 +342,7 @@ export default function ReceiptPage({
         }
       }
 
-      // Fallback
+      // 3. Fallback
       await shareReceiptOnWhatsApp({
         invoiceNumber,
         customerName,
@@ -328,7 +350,9 @@ export default function ReceiptPage({
         elementId: "receipt-document",
       });
     } catch (err) {
-      console.error("WhatsApp share failed:", err);
+      if (err.name !== "AbortError") {
+        console.error("WhatsApp share failed:", err);
+      }
     } finally {
       setIsGeneratingPdf(false);
     }
@@ -457,48 +481,6 @@ export default function ReceiptPage({
           </section>
         )}
       </main>
-
-      {/* Mobile Sticky Bottom Bar */}
-      <div className="mobile-bottom-bar no-print">
-        <button
-          type="button"
-          className="btn-mobile-submit"
-          onClick={handleSubmitInvoice}
-        >
-          <CheckCircle2 size={16} />
-          <span>اعتماد (Submit)</span>
-        </button>
-
-        <button
-          type="button"
-          className="btn-mobile-pdf"
-          onClick={handleDownloadPdf}
-          disabled={isGeneratingPdf}
-        >
-          <FileDown size={15} />
-          <span>{isGeneratingPdf ? "جاري التجهيز..." : "PDF"}</span>
-        </button>
-
-        <button
-          type="button"
-          className="btn-mobile-view-toggle"
-          onClick={() =>
-            setActiveMobileTab((prev) => (prev === "form" ? "preview" : "form"))
-          }
-        >
-          {activeMobileTab === "form" ? (
-            <>
-              <Eye size={14} />
-              <span>المعاينة</span>
-            </>
-          ) : (
-            <>
-              <Edit3 size={14} />
-              <span>التعديل</span>
-            </>
-          )}
-        </button>
-      </div>
 
       {/* Submit Confirmation Modal */}
       <SubmitModal
