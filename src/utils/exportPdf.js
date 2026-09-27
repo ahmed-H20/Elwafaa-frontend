@@ -71,12 +71,25 @@ export async function downloadReceiptPDF(elementId = "receipt-document", filenam
     link.download = filename;
     document.body.appendChild(link);
     link.click();
+
+    const isMobile =
+      window.innerWidth <= 860 ||
+      /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
+
+    if (isMobile) {
+      window.open(url, "_blank");
+    }
+
     setTimeout(() => {
       if (document.body.contains(link)) {
         document.body.removeChild(link);
       }
-      URL.revokeObjectURL(url);
-    }, 3000);
+      if (!isMobile) {
+        URL.revokeObjectURL(url);
+      }
+    }, 5000);
     return true;
   }
 

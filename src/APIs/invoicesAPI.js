@@ -193,6 +193,12 @@ export const downloadInvoicePDFFromServer = async (id, filename) => {
   const safeFilename = filename || `فاتورة_مبيعات_${id}.pdf`;
   const pdfUrl = `/api/v1/invoices/${id}/pdf`;
 
+  const isMobile =
+    window.innerWidth <= 860 ||
+    /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+
   const response = await fetch(pdfUrl);
   if (!response.ok) {
     throw new Error(`Server returned ${response.status}: Failed to generate PDF`);
@@ -201,6 +207,7 @@ export const downloadInvoicePDFFromServer = async (id, filename) => {
   const blob = await response.blob();
   const blobUrl = URL.createObjectURL(blob);
 
+  // 1. Trigger direct file download
   const a = document.createElement("a");
   a.href = blobUrl;
   a.download = safeFilename;
@@ -208,13 +215,24 @@ export const downloadInvoicePDFFromServer = async (id, filename) => {
   document.body.appendChild(a);
   a.click();
 
-  // Allow browser time to initialize download before cleaning up
+  // 2. In mobile view, also open the PDF in a new tab/page
+  if (isMobile) {
+    const newWindow = window.open(blobUrl, "_blank");
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
+      // If popup blocker intervened, open direct URL in new tab
+      window.open(pdfUrl, "_blank");
+    }
+  }
+
+  // Cleanup after giving enough time for mobile tab to read blob
   setTimeout(() => {
     if (document.body.contains(a)) {
       document.body.removeChild(a);
     }
-    URL.revokeObjectURL(blobUrl);
-  }, 4000);
+    if (!isMobile) {
+      URL.revokeObjectURL(blobUrl);
+    }
+  }, 5000);
 
   return blob;
 };
