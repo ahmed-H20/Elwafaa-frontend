@@ -237,7 +237,7 @@ export default function ReceiptPage({
     // Automatically trigger PDF download when submitting/saving invoice
     setTimeout(() => {
       handleDownloadPdf();
-    }, 250);
+    }, 0);
   };
 
   const handleDownloadPdf = async () => {
@@ -263,7 +263,7 @@ export default function ReceiptPage({
       receiptActionsRef.current = {
         submit: handleSubmitInvoice,
         downloadPdf: handleDownloadPdf,
-        print: handlePrint,
+        // print: handlePrint,
       };
     }
   });

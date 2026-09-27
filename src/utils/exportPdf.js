@@ -32,7 +32,7 @@ export async function downloadReceiptPDF(elementId = "receipt-document", filenam
     // Generate high-resolution image using native browser SVG/HarfBuzz shaping
     const dataUrl = await toJpeg(element, {
       quality: 0.98,
-      pixelRatio: 2.5, // 2.5x - 3x for crisp 300 DPI print quality
+      pixelRatio: 1, // 2.5x - 3x for crisp 300 DPI print quality
       backgroundColor: "#ffffff",
       cacheBust: true,
       style: {

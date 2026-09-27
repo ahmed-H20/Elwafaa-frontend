@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckCircle2, FileDown, Printer, Plus, X } from "lucide-react";
+import { CheckCircle2, FileDown, Printer, Plus, X, Share } from "lucide-react";
 import "./SubmitModal.css";
 import { formatCurrency } from "../utils/arabicOrdinals";
 
@@ -84,8 +84,8 @@ export default function SubmitModal({
                 onPrint();
               }}
             >
-              <Printer size={16} />
-              طباعة
+              <Share size={16} />
+              مشاركة
             </button>
 
             <button
