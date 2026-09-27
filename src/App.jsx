@@ -9,6 +9,7 @@ import { initialAdminInvoices } from "./data/invoicesData";
 import {
   fetchNormalizedInvoices,
   createInvoice,
+  updateInvoice,
   deleteInvoice,
   formatInvoiceForServer,
   normalizeInvoice,
@@ -56,7 +57,7 @@ export default function App() {
     }
   }, [invoicesList]);
 
-  // Load invoices dynamically from Server API on mount
+  // Load invoices dynamically from Server API on mount (Read operation)
   const refreshInvoices = async () => {
     try {
       setIsLoadingInvoices(true);
@@ -80,14 +81,16 @@ export default function App() {
     refreshInvoices();
   }, []);
 
-  // Save new invoice dynamically to MongoDB API
-  const handleSaveNewInvoice = async (recordOrFormData) => {
-    // Ensure invoiceNumber is unique
+  // Save or Update invoice dynamically in MongoDB API (Create / Update operations)
+  const handleSaveInvoice = async (recordOrFormData) => {
+    const existingMongoId =
+      recordOrFormData._id && !String(recordOrFormData._id).startsWith("inv-")
+        ? recordOrFormData._id
+        : null;
+
+    // Ensure invoiceNumber is preserved or formatted
     const determinedInvNum =
-      recordOrFormData.invoiceNumber &&
-      !invoicesList.some((i) => i.invoiceNumber === recordOrFormData.invoiceNumber)
-        ? recordOrFormData.invoiceNumber
-        : formatInvoiceNumber(getNextInvoiceNumber(invoicesList));
+      recordOrFormData.invoiceNumber || formatInvoiceNumber(getNextInvoiceNumber(invoicesList));
 
     try {
       // 1. Format payload according to server validation rules
@@ -98,38 +101,54 @@ export default function App() {
         invoiceNumber: determinedInvNum,
       });
 
-      // 2. Call backend POST /api/v1/invoices
-      const res = await createInvoice(payload);
-
-      // 3. Normalize created record
       let savedRecord;
-      if (res && res.invoice) {
-        savedRecord = normalizeInvoice(res.invoice, invoicesList.length);
+
+      if (existingMongoId) {
+        // UPDATE (PUT /api/v1/invoices/:id)
+        const res = await updateInvoice(existingMongoId, payload);
+        const updatedDoc = (res && res.invoice) ? res.invoice : (res && res._id ? res : { ...payload, _id: existingMongoId });
+        savedRecord = normalizeInvoice(updatedDoc, invoicesList.length);
+
+        setInvoicesList((prev) =>
+          prev.map((item) =>
+            item._id === existingMongoId || item.id === existingMongoId
+              ? savedRecord
+              : item
+          )
+        );
       } else {
-        savedRecord = normalizeInvoice(
-          {
-            ...recordOrFormData,
-            invoiceNumber: determinedInvNum,
-            name: payload.name,
-            products: payload.products,
-            tax: payload.tax,
-            total: recordOrFormData.total,
-            createdAt: new Date().toISOString(),
-          },
-          invoicesList.length
+        // CREATE (POST /api/v1/invoices)
+        const res = await createInvoice(payload);
+        if (res && res.invoice) {
+          savedRecord = normalizeInvoice(res.invoice, invoicesList.length);
+        } else {
+          savedRecord = normalizeInvoice(
+            {
+              ...recordOrFormData,
+              invoiceNumber: determinedInvNum,
+              name: payload.name,
+              products: payload.products,
+              tax: payload.tax,
+              total: recordOrFormData.total,
+              createdAt: new Date().toISOString(),
+            },
+            invoicesList.length
+          );
+        }
+
+        // Add newest at top
+        setInvoicesList((prev) =>
+          healDuplicateInvoices([
+            savedRecord,
+            ...prev.filter((i) => i.id !== savedRecord.id && i._id !== savedRecord._id),
+          ])
         );
       }
 
-      // Update state with newest at top, healed for uniqueness
-      setInvoicesList((prev) =>
-        healDuplicateInvoices([
-          savedRecord,
-          ...prev.filter((i) => i.id !== savedRecord.id && i._id !== savedRecord._id),
-        ])
-      );
+      setApiStatus("connected");
       return savedRecord;
     } catch (err) {
-      console.error("Backend error when saving invoice, saving locally:", err);
+      console.error("Backend error when saving invoice, falling back locally:", err);
       const fallbackRecord = normalizeInvoice(
         {
           ...recordOrFormData,
@@ -223,7 +242,8 @@ export default function App() {
           element={
             <ReceiptPage
               invoicesList={invoicesList}
-              onSaveNewInvoice={handleSaveNewInvoice}
+              onSaveNewInvoice={handleSaveInvoice}
+              onSaveInvoice={handleSaveInvoice}
               zoomLevel={zoomLevel}
               fitScale={fitScale}
               showPanel={showPanel}

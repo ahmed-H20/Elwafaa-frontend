@@ -33,6 +33,7 @@ import {
 export default function ReceiptPage({
   invoicesList = [],
   onSaveNewInvoice,
+  onSaveInvoice,
   zoomLevel,
   fitScale,
   showPanel,
@@ -215,8 +216,9 @@ export default function ReceiptPage({
     const finalRawNum = invoiceNumber?.trim() || getNextInvoiceNumber(invoicesList);
     const formattedInvNum = formatInvoiceNumber(finalRawNum);
 
-    const newInvoiceRecord = {
-      id: `inv-${Date.now()}`,
+    const invoiceRecord = {
+      _id: currentMongoId,
+      id: currentMongoId || `inv-${Date.now()}`,
       clientName: customerName || `عميل #${finalRawNum}`,
       invoiceNumber: formattedInvNum,
       avatarLetters: clientInitials,
@@ -228,8 +230,9 @@ export default function ReceiptPage({
     };
 
     let savedRecord = null;
-    if (onSaveNewInvoice) {
-      savedRecord = await onSaveNewInvoice(newInvoiceRecord);
+    const saveFn = onSaveInvoice || onSaveNewInvoice;
+    if (saveFn) {
+      savedRecord = await saveFn(invoiceRecord);
       if (savedRecord?._id) {
         setCurrentMongoId(savedRecord._id);
       }
@@ -241,25 +244,22 @@ export default function ReceiptPage({
 
   const handleDownloadPdf = async (idOverride) => {
     setIsGeneratingPdf(true);
-    const targetId = idOverride || currentMongoId || searchParams.get("id");
-    const fileName = `فاتورة_مبيعات_${customerName || invoiceNumber}.pdf`;
+    let targetId = idOverride || currentMongoId || searchParams.get("id");
+    const cleanName = customerName?.trim() ? `_${customerName.trim().replace(/\s+/g, "_")}` : "";
+    const fileName = `فاتورة_مبيعات_${invoiceNumber || "1"}${cleanName}.pdf`;
 
     try {
-      // 1. Try server-side Puppeteer PDF generation if invoice exists on server
-      if (targetId && !String(targetId).startsWith("inv-")) {
-        await downloadInvoicePDFFromServer(targetId, fileName);
-        return;
-      }
-
-      // 2. If not saved on server yet, save first to get Mongo ID and generate server PDF
-      if (onSaveNewInvoice) {
+      // 1. Sync latest changes to server first so PDF includes all updated items
+      const saveFn = onSaveInvoice || onSaveNewInvoice;
+      if (saveFn) {
         const clientInitials = customerName
           ? customerName.split(" ").filter(Boolean).map((n) => n[0]).join("").slice(0, 2).toUpperCase()
           : "CL";
         const finalRawNum = invoiceNumber?.trim() || getNextInvoiceNumber(invoicesList);
         const formattedInvNum = formatInvoiceNumber(finalRawNum);
-        const saved = await onSaveNewInvoice({
-          id: `inv-${Date.now()}`,
+        const saved = await saveFn({
+          _id: currentMongoId,
+          id: currentMongoId || `inv-${Date.now()}`,
           clientName: customerName || `عميل #${finalRawNum}`,
           invoiceNumber: formattedInvNum,
           avatarLetters: clientInitials,
@@ -271,16 +271,21 @@ export default function ReceiptPage({
         });
 
         if (saved?._id) {
+          targetId = saved._id;
           setCurrentMongoId(saved._id);
-          await downloadInvoicePDFFromServer(saved._id, fileName);
-          return;
         }
       }
 
-      // 3. Fallback to client-side PDF if offline
+      // 2. Download high-resolution server-generated PDF
+      if (targetId && !String(targetId).startsWith("inv-")) {
+        await downloadInvoicePDFFromServer(targetId, fileName);
+        return;
+      }
+
+      // 3. Fallback to client-side PDF file download if offline
       await downloadReceiptPDF("receipt-document", fileName);
     } catch (err) {
-      console.warn("Server PDF generation failed, falling back to client-side PDF:", err);
+      console.warn("Server PDF download failed, falling back to client-side PDF:", err);
       try {
         await downloadReceiptPDF("receipt-document", fileName);
       } catch (fallbackErr) {
@@ -302,14 +307,16 @@ export default function ReceiptPage({
     try {
       // 1. Ensure invoice is saved to server to get MongoDB ID
       if (!targetId || String(targetId).startsWith("inv-")) {
-        if (onSaveNewInvoice) {
+        const saveFn = onSaveInvoice || onSaveNewInvoice;
+        if (saveFn) {
           const clientInitials = customerName
             ? customerName.split(" ").filter(Boolean).map((n) => n[0]).join("").slice(0, 2).toUpperCase()
             : "CL";
           const finalRawNum = invoiceNumber?.trim() || getNextInvoiceNumber(invoicesList);
           const formattedInvNum = formatInvoiceNumber(finalRawNum);
-          const saved = await onSaveNewInvoice({
-            id: `inv-${Date.now()}`,
+          const saved = await saveFn({
+            _id: currentMongoId,
+            id: currentMongoId || `inv-${Date.now()}`,
             clientName: customerName || `عميل #${finalRawNum}`,
             invoiceNumber: formattedInvNum,
             avatarLetters: clientInitials,

@@ -52,16 +52,15 @@ export const getInvoiceById = (id) => api.get(`${ENDPOINT}/${id}`);
 /**
  * Update an existing invoice.
  *
- * Required body fields (server validation):
- *   - name        {string}
- *   - phone       {string}
- *   - address     {string}
- *   - description {string}
- *   - image       {string}
+ * Accepted body fields:
+ *   - name          {string}
+ *   - tax           {number}
+ *   - products      {Array<{name:string, qty:number, price:number}>}
+ *   - invoiceNumber {string}
  *
- * @param {string} id
- * @param {{ name: string, phone: string, address: string, description: string, image: string }} updateData
- * @returns {Promise<Invoice>}
+ * @param {string} id - MongoDB ObjectId string
+ * @param {Object} updateData
+ * @returns {Promise<{ message: string, invoice: Object }>}
  */
 export const updateInvoice = (id, updateData) =>
   api.put(`${ENDPOINT}/${id}`, updateData);
@@ -191,19 +190,32 @@ export const fetchNormalizedInvoices = async () => {
  */
 export const downloadInvoicePDFFromServer = async (id, filename) => {
   if (!id) throw new Error("Invoice ID is required for server PDF download");
-  const response = await fetch(`/api/v1/invoices/${id}/pdf`);
+  const safeFilename = filename || `فاتورة_مبيعات_${id}.pdf`;
+  const pdfUrl = `/api/v1/invoices/${id}/pdf`;
+
+  const response = await fetch(pdfUrl);
   if (!response.ok) {
     throw new Error(`Server returned ${response.status}: Failed to generate PDF`);
   }
+
   const blob = await response.blob();
-  const url = URL.createObjectURL(blob);
+  const blobUrl = URL.createObjectURL(blob);
+
   const a = document.createElement("a");
-  a.href = url;
-  a.download = filename || `فاتورة_مبيعات_${id}.pdf`;
+  a.href = blobUrl;
+  a.download = safeFilename;
+  a.style.display = "none";
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+
+  // Allow browser time to initialize download before cleaning up
+  setTimeout(() => {
+    if (document.body.contains(a)) {
+      document.body.removeChild(a);
+    }
+    URL.revokeObjectURL(blobUrl);
+  }, 4000);
+
   return blob;
 };
 

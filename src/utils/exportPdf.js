@@ -71,14 +71,16 @@ export async function downloadReceiptPDF(elementId = "receipt-document", filenam
     link.download = filename;
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    setTimeout(() => {
+      if (document.body.contains(link)) {
+        document.body.removeChild(link);
+      }
+      URL.revokeObjectURL(url);
+    }, 3000);
     return true;
   }
 
-  // Fallback: window.print()
-  window.print();
-  return true;
+  return false;
 }
 
 /**
