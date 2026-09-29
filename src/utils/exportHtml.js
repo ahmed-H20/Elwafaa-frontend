@@ -1184,33 +1184,66 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
   </div>
 
   <script>
-    function handleWhatsAppShare() {
-      var num = ${JSON.stringify(invoiceNumber)};
-      var cl = ${JSON.stringify(customerName)};
-      var tot = ${JSON.stringify(calculatedTotal.toFixed(2))};
-      var text = "*فاتورة مبيعات - شركة الوفاء للمستلزمات*\\n\\n" +
-                 "📄 رقم الفاتورة: #" + num + "\\n" +
-                 "👤 العميل: " + (cl || "—") + "\\n" +
-                 "المنتجات: "
-                 ${items.map((item) => {
-    text += item.description + " " + item.quantity + " " + item.price + " " + item.total + "\\n";
-  }).join("\\n")}
-                 text += "💰 الإجمالي: " + tot + " ريال";
-      if (navigator.share) {
-        navigator.share({ title: "فاتورة مبيعات", text: text }).catch(function(){});
-      } else {
-        window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
-      }
+  function handleWhatsAppShare() {
+    var num = ${JSON.stringify(invoiceNumber)};
+    var cl = ${JSON.stringify(clientName)};
+    var tot = ${JSON.stringify(calculatedTotal.toFixed(2))};
+
+    // رابط عرض الفاتورة
+    var invoiceUrl =
+      ${JSON.stringify(
+    `${process.env.VITE_BACKEND_URL || "https://elwafaabackend.vercel.app"}/api/v1/invoices/${invoiceId}/view`
+  )};
+
+    var text =
+      "*فاتورة مبيعات - شركة الوفاء للمستلزمات*" +
+      "\\n\\n" +
+      "📄 رقم الفاتورة: #" + num +
+      "\\n" +
+      "👤 العميل: " + (cl || "—") +
+      "\\n" +
+      "💰 الإجمالي: " + tot + " ريال" +
+      "\\n" +
+      "🔗 رابط عرض الفاتورة:" +
+      "\\n" +
+      invoiceUrl;
+
+    // Web Share API
+    if (navigator.share) {
+      navigator.share({
+        title: "فاتورة مبيعات - " + num,
+        text: text
+      }).catch(function (error) {
+        // User cancelled sharing
+        if (error && error.name === "AbortError") {
+          return;
+        }
+
+        // Fallback to WhatsApp
+        window.open(
+          "https://wa.me/?text=" + encodeURIComponent(text),
+          "_blank"
+        );
+      });
+
+      return;
     }
 
-    ${autoPrint ? `
-    window.addEventListener("load", function() {
-      setTimeout(function() {
-        window.print();
-      }, 400);
-    });
-    ` : ""}
-  </script>
+    // Fallback for browsers that don't support navigator.share
+    window.open(
+      "https://wa.me/?text=" + encodeURIComponent(text),
+      "_blank"
+    );
+  }
+
+  ${autoPrint ? `
+  window.addEventListener("load", function() {
+    setTimeout(function() {
+      window.print();
+    }, 400);
+  });
+  ` : ""}
+</script>
 </body>
 </html>`;
 }
