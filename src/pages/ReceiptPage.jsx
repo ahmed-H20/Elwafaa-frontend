@@ -18,6 +18,7 @@ import {
   getCurrentDateFormatted,
 } from "../utils/arabicOrdinals";
 import { downloadReceiptPDF, shareReceiptOnWhatsApp } from "../utils/exportPdf";
+import { shareReceiptImage } from "../utils/shareImage";
 import { openInvoiceInBlankHtmlPage } from "../utils/exportHtml";
 import { initialSampleItems } from "../data/invoicesData";
 import {
@@ -166,7 +167,7 @@ export default function ReceiptPage({
 
   const grandTotal = useMemo(() => {
     const taxNum = parseFloat(tax) || 0;
-    return subtotal + taxNum;
+    return subtotal + (taxNum / 100 * subtotal);
   }, [subtotal, tax]);
 
   // Handlers
@@ -341,9 +342,6 @@ export default function ReceiptPage({
   const handleShareWhatsApp = async () => {
     setIsGeneratingPdf(true);
     let targetId = currentMongoId || searchParams.get("id");
-    const cleanName = customerName?.trim() ? `_${customerName.trim().replace(/\s+/g, "_")}` : "";
-    const filename = `فاتورة_مبيعات_${invoiceNumber || "1"}${cleanName}.pdf`;
-    const shareText = `*فاتورة مبيعات - شركة الوفاء للمستلزمات*\n\n📄 رقم الفاتورة: #${invoiceNumber}\n👤 العميل: ${customerName || "—"}\n💰 الإجمالي: ${grandTotal.toFixed(2)} ريال`;
 
     try {
       // 1. Save/sync to get a MongoDB ID if needed
@@ -374,52 +372,17 @@ export default function ReceiptPage({
         }
       }
 
-      // 2. Fetch PDF blob from server (or generate client-side)
-      let pdfBlob = null;
-      if (targetId && !String(targetId).startsWith("inv-")) {
-        try {
-          pdfBlob = await fetchInvoicePDFBlob(targetId);
-        } catch (e) {
-          console.warn("Server PDF blob failed, using client generator:", e);
-        }
-      }
-      if (!pdfBlob) {
-        pdfBlob = await generateReceiptPDFBlob("receipt-document");
-      }
-
-      if (pdfBlob) {
-        const pdfFile = new File([pdfBlob], filename, {
-          type: "application/pdf",
-          lastModified: Date.now(),
-        });
-
-        // 3. Web Share API (works on Chrome Android, Safari iOS)
-        // IMPORTANT: navigator.share must be called here — still within the user-gesture chain
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-          try {
-            await navigator.share({
-              files: [pdfFile],
-              title: `فاتورة مبيعات #${invoiceNumber}`,
-              text: shareText,
-            });
-            return;
-          } catch (shareErr) {
-            if (shareErr.name === "AbortError") return; // user cancelled
-            console.warn("navigator.share failed:", shareErr);
-          }
-        }
-      }
-
-      // 4. Fallback for desktop / unsupported: open WhatsApp with text
-      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
-      window.open(waUrl, "_blank");
+      // 2. Share as high-resolution JPG PHOTO directly to WhatsApp
+      await shareReceiptImage({
+        invoiceNumber,
+        customerName,
+        grandTotal,
+        elementId: "receipt-document",
+      });
 
     } catch (err) {
       if (err.name !== "AbortError") {
-        console.error("Share failed:", err);
-        // Last-resort: open WhatsApp with text
-        const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
-        window.open(waUrl, "_blank");
+        console.error("WhatsApp photo share failed:", err);
       }
     } finally {
       setIsGeneratingPdf(false);
