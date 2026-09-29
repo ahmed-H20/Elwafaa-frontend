@@ -1048,7 +1048,7 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
         </button>
 
         ${invoiceId ? `
-        <a href="/api/v1/invoices/${invoiceId}/pdf" download="فاتورة_مبيعات_${escapeHTML(invoiceNumber)}.pdf" class="act-btn btn-download" title="تنزيل ملف PDF">
+        <a href="${import.meta.env.VITE_BACKEND_URL}/api/v1/invoices/${invoiceId}/pdf" download="فاتورة_مبيعات_${escapeHTML(invoiceNumber)}.pdf" class="act-btn btn-download" title="تنزيل ملف PDF">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
           </svg>
@@ -1226,7 +1226,7 @@ export function openInvoiceInBlankHtmlPage(invoiceData, autoPrint = false) {
 
   if (targetId) {
     // If saved on server, open the server-rendered HTML page
-    const url = `/api/v1/invoices/${targetId}/view${autoPrint ? "?print=true" : ""}`;
+    const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/invoices/${targetId}/view${autoPrint ? "?print=true" : ""}`;
     const win = window.open(url, "_blank");
     if (!win || win.closed || typeof win.closed === "undefined") {
       // If popup blocker intervened, fallback to anchor tag

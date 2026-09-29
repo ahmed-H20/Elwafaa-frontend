@@ -236,9 +236,8 @@ export default function AdminDashboard({
                   <td>
                     <div className="client-info-cell">
                       <div
-                        className={`client-avatar-badge ${
-                          inv.avatarClass || "avatar-default"
-                        }`}
+                        className={`client-avatar-badge ${inv.avatarClass || "avatar-default"
+                          }`}
                       >
                         {inv.avatarLetters ||
                           inv.clientName?.slice(0, 2).toUpperCase() ||
@@ -265,7 +264,7 @@ export default function AdminDashboard({
                   <td className="action-cell">
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 6 }}>
                       <a
-                        href={`/api/v1/invoices/${inv.id || inv._id}/view`}
+                        href={`${import.meta.env.VITE_BACKEND_URL}/api/v1/invoices/${inv.id || inv._id}/view`}
                         target="_blank"
                         rel="noopener noreferrer"
                         title="فتح الفاتورة في صفحة HTML مستقلة للطباعة والتنزيل"

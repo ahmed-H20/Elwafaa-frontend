@@ -232,7 +232,7 @@ export const fetchInvoicePDFBlob = async (id) => {
  */
 export const openInvoiceHTMLView = (id, autoPrint = false) => {
   if (!id) throw new Error("Invoice ID is required to open invoice HTML");
-  const url = `/api/v1/invoices/${id}/view${autoPrint ? "?print=true" : ""}`;
+  const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/invoices/${id}/view${autoPrint ? "?print=true" : ""}`;
 
   const win = window.open(url, "_blank");
   if (!win || win.closed || typeof win.closed === "undefined") {
