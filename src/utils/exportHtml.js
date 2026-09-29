@@ -1048,7 +1048,7 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
         </button>
 
         ${invoiceId ? `
-        <a href="${import.meta.env.VITE_BACKEND_URL}/api/v1/invoices/${invoiceId}/pdf" download="فاتورة_مبيعات_${escapeHTML(invoiceNumber)}.pdf" class="act-btn btn-download" title="تنزيل ملف PDF">
+        <a href="/api/v1/invoices/${invoiceId}/pdf" download="فاتورة_مبيعات_${escapeHTML(invoiceNumber)}.pdf" class="act-btn btn-download" title="تنزيل ملف PDF">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
           </svg>
@@ -1191,7 +1191,11 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
       var text = "*فاتورة مبيعات - شركة الوفاء للمستلزمات*\\n\\n" +
                  "📄 رقم الفاتورة: #" + num + "\\n" +
                  "👤 العميل: " + (cl || "—") + "\\n" +
-                 "💰 الإجمالي: " + tot + " ريال";
+                 "المنتجات: "
+                 ${items.map((item) => {
+    text += item.description + " " + item.quantity + " " + item.price + " " + item.total + "\\n";
+  }).join("\\n")}
+                 text += "💰 الإجمالي: " + tot + " ريال";
       if (navigator.share) {
         navigator.share({ title: "فاتورة مبيعات", text: text }).catch(function(){});
       } else {

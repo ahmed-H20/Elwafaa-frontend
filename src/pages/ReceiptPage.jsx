@@ -360,15 +360,19 @@ export default function ReceiptPage({
             invoiceNumber: formattedInvNum,
             avatarLetters: clientInitials,
             avatarClass: "avatar-default",
+            items: items.map((item) => {
+              return item.description + " " + item.quantity + " " + item.price + " " + item.total + "\\n";
+            }).join("\\n"),
             total: Math.round(grandTotal),
             tax: tax,
             date: invoiceDate,
-            items: items,
+            link: `https://elwafaabackend.vercel.app/api/v1/invoice/${saved._id}/view`,
           });
-          if (saved?._id) {
-            targetId = saved._id;
-            setCurrentMongoId(saved._id);
-          }
+        }
+
+        if (saved?._id) {
+          targetId = saved._id;
+          setCurrentMongoId(saved._id);
         }
       }
 
