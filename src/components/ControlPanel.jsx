@@ -247,7 +247,8 @@ export default function ControlPanel({
                       step="0.01"
                       min="0"
                       className="input-field text-center"
-                      value={item.price}
+                      placeholder="0"
+                      // value={item.price}
                       onChange={(e) => updateItem(item.id, "price", e.target.value)}
                     />
                   </div>

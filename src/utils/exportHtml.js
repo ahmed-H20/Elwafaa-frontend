@@ -1039,22 +1039,7 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
       </div>
 
       <div class="action-buttons">
-        <button type="button" class="act-btn btn-print" onclick="window.print()" title="طباعة الفاتورة أو حفظ كملف PDF">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
-            <rect x="6" y="14" width="12" height="8"/>
-          </svg>
-          <span>طباعة / حفظ PDF</span>
-        </button>
-
-        ${invoiceId ? `
-        <a href="/api/v1/invoices/${invoiceId}/pdf" download="فاتورة_مبيعات_${escapeHTML(invoiceNumber)}.pdf" class="act-btn btn-download" title="تنزيل ملف PDF">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-          </svg>
-          <span>تحميل PDF</span>
-        </a>
-        ` : ""}
+       
 
         <button type="button" class="act-btn btn-whatsapp" onclick="handleWhatsAppShare()" title="مشاركة الفاتورة عبر واتساب">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">

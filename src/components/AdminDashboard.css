@@ -169,8 +169,32 @@
   width: 100%;
 }
 
+/* Horizontal scroll wrapper — keeps card border-radius intact */
+.table-scroll-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
+/* Thin, styled scrollbar */
+.table-scroll-wrapper::-webkit-scrollbar {
+  height: 5px;
+}
+.table-scroll-wrapper::-webkit-scrollbar-track {
+  background: #f7f4ea;
+  border-radius: 0 0 16px 16px;
+}
+.table-scroll-wrapper::-webkit-scrollbar-thumb {
+  background: #c8c0a0;
+  border-radius: 4px;
+}
+.table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #a89a70;
+}
+
 .admin-table {
   width: 100%;
+  min-width: 480px; /* ensures scroll kicks in before columns collapse */
   border-collapse: collapse;
   text-align: left;
 }

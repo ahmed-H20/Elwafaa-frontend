@@ -53,7 +53,7 @@ export default function ReceiptPage({
 
   // Receipt manual states
   const [customerName, setCustomerName] = useState("");
-  const [tax, setTax] = useState("0");
+  const [tax, setTax] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState(() => getNextInvoiceNumber(invoicesList));
   const [invoiceDate, setInvoiceDate] = useState(getCurrentDateFormatted());
   const [items, setItems] = useState([]);
@@ -70,7 +70,7 @@ export default function ReceiptPage({
 
   const handleLoadSample = () => {
     setCustomerName("");
-    setTax("0");
+    setTax("");
     setInvoiceNumber(getNextInvoiceNumber(invoicesList));
     setInvoiceDate(getCurrentDateFormatted());
     setItems([]);
@@ -79,7 +79,7 @@ export default function ReceiptPage({
 
   const handleResetNew = () => {
     setCustomerName("");
-    setTax("0");
+    setTax("");
     setInvoiceNumber(getNextInvoiceNumber(invoicesList));
     setInvoiceDate(getCurrentDateFormatted());
     setItems([]);

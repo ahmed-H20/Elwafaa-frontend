@@ -220,13 +220,14 @@ export default function AdminDashboard({
 
         {/* Invoices Table Card */}
         <div className="admin-table-card">
+          <div className="table-scroll-wrapper">
           <table className="admin-table">
             <thead>
               <tr>
                 <th className="th-client">اسم العميل</th>
-                <th className="th-inv">رقم الفاتورة</th>
-                <th className="th-total">الاجمالي العام</th>
                 <th className="th-action"></th>
+                <th className="th-total">الاجمالي العام</th>
+
               </tr>
             </thead>
             <tbody>
@@ -244,19 +245,6 @@ export default function AdminDashboard({
                           "CL"}
                       </div>
                       <span className="client-name-text">{inv.clientName}</span>
-                    </div>
-                  </td>
-
-                  {/* Invoice Badge */}
-                  <td className="inv-number-cell">
-                    <span className="inv-badge-pill">{inv.invoiceNumber}</span>
-                  </td>
-
-                  {/* Total Amount & Currency */}
-                  <td>
-                    <div className="total-amount-cell">
-                      <span className="amount-number">{inv.total?.toLocaleString() || inv.total}</span>
-                      <span className="amount-currency">SAR</span>
                     </div>
                   </td>
 
@@ -321,6 +309,18 @@ export default function AdminDashboard({
                       )}
                     </div>
                   </td>
+
+
+
+                  {/* Total Amount & Currency */}
+                  <td>
+                    <div className="total-amount-cell">
+                      <span className="amount-number">{inv.total?.toLocaleString() || inv.total}</span>
+                      <span className="amount-currency">SAR</span>
+                    </div>
+                  </td>
+
+
                 </tr>
               ))}
 
@@ -333,6 +333,7 @@ export default function AdminDashboard({
               )}
             </tbody>
           </table>
+          </div>
         </div>
 
         {/* Pagination Row matching original image */}
