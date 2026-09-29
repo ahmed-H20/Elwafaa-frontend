@@ -1081,9 +1081,9 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
         </div>
 
         <div class="header-row">
-          // <div class="invoice-title">
-          //   فاتورة مبيعات
-          // </div>
+          <div class="invoice-title">
+            فاتورة مبيعات
+          </div>
 
           <div class="invoice-meta">
             <div class="meta-item">
