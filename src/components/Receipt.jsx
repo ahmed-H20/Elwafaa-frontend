@@ -7,6 +7,7 @@ import defaultLogo from "../assets/logo.png";
 export default function Receipt({
   invoiceNumber = "1",
   customerName = "",
+  customerPhone = "",
   invoiceDate = "",
   items = [],
   tax = 0,
@@ -61,7 +62,10 @@ export default function Receipt({
               <div className="meta-row">
                 <span className="meta-label">اسم العميل</span>
                 {customerName ? (
-                  <span className="meta-val customer-name-val">{customerName}</span>
+                  <span className="meta-val customer-name-val">
+                    {customerName}
+                    {customerPhone && <small style={{ marginRight: 6, fontSize: "11px", color: "#64748b" }}>({customerPhone})</small>}
+                  </span>
                 ) : null}
               </div>
               <div className="meta-row">

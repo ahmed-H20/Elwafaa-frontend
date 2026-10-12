@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   RotateCcw,
   User,
+  Phone,
   Calendar,
   Receipt as ReceiptIcon,
   Percent
@@ -17,6 +18,11 @@ import { formatCurrency } from "../utils/arabicOrdinals";
 export default function ControlPanel({
   customerName,
   setCustomerName,
+  customerId,
+  setCustomerId,
+  customerPhone,
+  setCustomerPhone,
+  customersList = [],
   invoiceNumber,
   setInvoiceNumber,
   invoiceDate,
@@ -40,6 +46,40 @@ export default function ControlPanel({
   onResetNew,
   isGeneratingPdf,
 }) {
+  const [showDropdown, setShowDropdown] = React.useState(false);
+  const dropdownRef = React.useRef(null);
+
+  // Close dropdown on click outside
+  React.useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Filter matching customers
+  const filteredCustomers = React.useMemo(() => {
+    if (!customerName || !customerName.trim()) return customersList.slice(0, 5);
+    const q = customerName.toLowerCase().trim();
+    return customersList
+      .filter(
+        (c) =>
+          c.name?.toLowerCase().includes(q) ||
+          (c.phone && c.phone.includes(q))
+      )
+      .slice(0, 8);
+  }, [customersList, customerName]);
+
+  const handleSelectCustomer = (customer) => {
+    setCustomerName(customer.name);
+    if (setCustomerId) setCustomerId(customer._id);
+    if (setCustomerPhone) setCustomerPhone(customer.phone || "");
+    setShowDropdown(false);
+  };
+
   return (
     <aside className="control-panel no-print">
       {/* Panel Header */}
@@ -69,60 +109,83 @@ export default function ControlPanel({
         </div>
       </div>
 
-      {/* Brand & Badge Customization Section */}
-      {/* <section className="form-section">
-        <div className="section-label">
-          <span>شعار وهوية الفاتورة</span>
-          <span className="badge-tag auto">هوية الشعار</span>
-        </div>
-
-        <div className="grid-2">
-          <div className="input-group">
-            <label className="input-label">خلفية مستطيل الترويسة</label>
-            <select
-              className="input-field"
-              value={badgeTheme}
-              onChange={(e) => setBadgeTheme && setBadgeTheme(e.target.value)}
-            >
-              <option value="white">أبيض ناصع (إبراز الشعار)</option>
-              <option value="dark">أخضر زيتي متناسق</option>
-            </select>
-          </div>
-
-          <div className="input-group">
-            <label className="input-label">شكل الشعار</label>
-            <select
-              className="input-field"
-              value={logoChoice}
-              onChange={(e) => setLogoChoice && setLogoChoice(e.target.value)}
-            >
-              <option value="cropped">الشعار الكامل</option>
-              <option value="icon">رمز الدرع فقط</option>
-            </select>
-          </div>
-        </div>
-      </section> */}
-
       {/* Invoice Meta Section */}
       <section className="form-section">
         <div className="section-label">
           <span>بيانات العميل والفاتورة</span>
         </div>
 
-        {/* Customer Name (Manual Input - اسم العميل يدوي) */}
-        <div className="input-group">
-          <label className="input-label">
+        {/* Customer Name Autocomplete */}
+        <div className="input-group" ref={dropdownRef}>
+          <label className="input-label" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span>
               <User size={13} style={{ display: "inline", verticalAlign: "middle", marginLeft: 4 }} />
               اسم العميل
             </span>
+            {customerId && (
+              <span className="customer-status-badge">
+                <CheckCircle2 size={11} /> عميل مسجل
+              </span>
+            )}
+          </label>
+          <div className="customer-autocomplete-wrapper">
+            <input
+              type="text"
+              className="input-field"
+              placeholder="اكتب اسم العميل (اختر مسجلاً أو أدخل جديداً)"
+              value={customerName}
+              onFocus={() => setShowDropdown(true)}
+              onChange={(e) => {
+                setCustomerName(e.target.value);
+                if (customerId && setCustomerId) setCustomerId(null);
+                setShowDropdown(true);
+              }}
+              autoComplete="off"
+            />
+
+            {showDropdown && filteredCustomers.length > 0 && (
+              <div className="customer-dropdown-menu">
+                {filteredCustomers.map((cust) => (
+                  <div
+                    key={cust._id}
+                    className="customer-dropdown-item"
+                    onClick={() => handleSelectCustomer(cust)}
+                  >
+                    <div className="customer-item-info">
+                      <span className="customer-item-name">{cust.name}</span>
+                      {cust.phone && (
+                        <span className="customer-item-phone" dir="ltr">
+                          📞 {cust.phone}
+                        </span>
+                      )}
+                    </div>
+                    {cust.invoicesCount != null && cust.invoicesCount > 0 && (
+                      <span className="customer-item-badge">
+                        {cust.invoicesCount} {cust.invoicesCount === 1 ? "فاتورة" : "فواتير"}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Customer Phone (Optional - رقم الهاتف اختياري لسرعة التسجيل) */}
+        <div className="input-group">
+          <label className="input-label">
+            <span>
+              <Phone size={13} style={{ display: "inline", verticalAlign: "middle", marginLeft: 4 }} />
+              رقم الهاتف <span style={{ fontSize: "11px", color: "#64748b", fontWeight: 400 }}>(اختياري)</span>
+            </span>
           </label>
           <input
-            type="text"
+            type="tel"
             className="input-field"
-            placeholder="أدخل اسم العميل"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
+            placeholder="مثال: 01012345678"
+            value={customerPhone || ""}
+            onChange={(e) => setCustomerPhone && setCustomerPhone(e.target.value)}
+            dir="ltr"
           />
         </div>
 

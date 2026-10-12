@@ -28,6 +28,7 @@ import {
   fetchInvoicePDFBlob,
   openInvoiceHTMLView,
 } from "../APIs/invoicesAPI";
+import { getAllCustomers } from "../APIs/customersAPI";
 import {
   getNextInvoiceNumber,
   formatInvoiceNumber,
@@ -53,6 +54,9 @@ export default function ReceiptPage({
 
   // Receipt manual states
   const [customerName, setCustomerName] = useState("");
+  const [customerId, setCustomerId] = useState(null);
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [customersList, setCustomersList] = useState([]);
   const [tax, setTax] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState(() => getNextInvoiceNumber(invoicesList));
   const [invoiceDate, setInvoiceDate] = useState(getCurrentDateFormatted());
@@ -68,8 +72,19 @@ export default function ReceiptPage({
   const [isMobile, setIsMobile] = useState(false);
   const previewContainerRef = useRef(null);
 
+  // Load registered customers for rapid autocomplete
+  useEffect(() => {
+    getAllCustomers()
+      .then((data) => {
+        if (Array.isArray(data)) setCustomersList(data);
+      })
+      .catch((err) => console.warn("Could not load customers list:", err));
+  }, []);
+
   const handleLoadSample = () => {
     setCustomerName("");
+    setCustomerId(null);
+    setCustomerPhone("");
     setTax("");
     setInvoiceNumber(getNextInvoiceNumber(invoicesList));
     setInvoiceDate(getCurrentDateFormatted());
@@ -79,6 +94,8 @@ export default function ReceiptPage({
 
   const handleResetNew = () => {
     setCustomerName("");
+    setCustomerId(null);
+    setCustomerPhone("");
     setTax("");
     setInvoiceNumber(getNextInvoiceNumber(invoicesList));
     setInvoiceDate(getCurrentDateFormatted());
@@ -96,6 +113,8 @@ export default function ReceiptPage({
       const found = invoicesList.find((i) => i.id === invId || i._id === invId);
       if (found) {
         setCustomerName(found.clientName || found.name || "");
+        setCustomerId(found.customerId || null);
+        setCustomerPhone(found.customerPhone || "");
         setInvoiceNumber(found.invoiceNumber?.replace("INV-", "") || "1");
         setInvoiceDate(found.date || getCurrentDateFormatted());
         setTax(found.tax != null ? String(found.tax) : "0");
@@ -116,6 +135,8 @@ export default function ReceiptPage({
             const normalized = normalizeInvoice(doc);
             if (normalized) {
               setCustomerName(normalized.clientName || "");
+              setCustomerId(normalized.customerId || null);
+              setCustomerPhone(normalized.customerPhone || "");
               setInvoiceNumber(normalized.invoiceNumber?.replace("INV-", "") || "1");
               setInvoiceDate(normalized.date || getCurrentDateFormatted());
               setTax(String(normalized.tax || "0"));
@@ -135,6 +156,12 @@ export default function ReceiptPage({
       }
     } else if (isNew) {
       handleResetNew();
+      const prefillName = searchParams.get("customerName");
+      const prefillId = searchParams.get("customerId");
+      const prefillPhone = searchParams.get("customerPhone");
+      if (prefillName) setCustomerName(prefillName);
+      if (prefillId) setCustomerId(prefillId);
+      if (prefillPhone) setCustomerPhone(prefillPhone);
       setActiveMobileTab("form");
     }
   }, [searchParams]);
@@ -223,6 +250,8 @@ export default function ReceiptPage({
       _id: currentMongoId,
       id: currentMongoId || `inv-${Date.now()}`,
       clientName: customerName || `عميل #${finalRawNum}`,
+      customerId: customerId || null,
+      customerPhone: customerPhone || "",
       invoiceNumber: formattedInvNum,
       avatarLetters: clientInitials,
       avatarClass: "avatar-default",
@@ -263,6 +292,8 @@ export default function ReceiptPage({
             _id: currentMongoId,
             id: currentMongoId || `inv-${Date.now()}`,
             clientName: customerName || `عميل #${finalRawNum}`,
+            customerId: customerId || null,
+            customerPhone: customerPhone || "",
             invoiceNumber: formattedInvNum,
             avatarLetters: clientInitials,
             avatarClass: "avatar-default",
@@ -455,6 +486,11 @@ export default function ReceiptPage({
           <ControlPanel
             customerName={customerName}
             setCustomerName={setCustomerName}
+            customerId={customerId}
+            setCustomerId={setCustomerId}
+            customerPhone={customerPhone}
+            setCustomerPhone={setCustomerPhone}
+            customersList={customersList}
             invoiceNumber={invoiceNumber}
             setInvoiceNumber={setInvoiceNumber}
             invoiceDate={invoiceDate}
@@ -504,6 +540,7 @@ export default function ReceiptPage({
                   <Receipt
                     invoiceNumber={invoiceNumber}
                     customerName={customerName}
+                    customerPhone={customerPhone}
                     invoiceDate={invoiceDate}
                     items={items}
                     tax={tax}

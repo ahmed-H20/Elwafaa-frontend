@@ -96,6 +96,8 @@ export default function App() {
       // 1. Format payload according to server validation rules
       const payload = formatInvoiceForServer({
         customerName: recordOrFormData.clientName || recordOrFormData.customerName || recordOrFormData.name,
+        customerId: recordOrFormData.customerId,
+        phone: recordOrFormData.customerPhone || recordOrFormData.phone,
         items: recordOrFormData.items || recordOrFormData.products || [],
         tax: recordOrFormData.tax || 0,
         invoiceNumber: determinedInvNum,

@@ -75,8 +75,8 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
     }
 
     @page {
-      size: A4;
-      margin: 0;
+      size: A4 portrait;
+      margin: 8mm 12mm 10mm 12mm;
     }
 
     html, body {
@@ -218,30 +218,27 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
       flex-direction: column;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
       border-radius: 4px;
+      overflow: hidden;
     }
 
     /* Top & Bottom Bars */
     .top-bar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
+      margin: 0 -16mm 0 -16mm;
       height: 9mm;
       background-color: #135d66;
+      flex-shrink: 0;
     }
 
     .bottom-bar {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      margin: 10mm -16mm -16mm -16mm;
       height: 9mm;
       background-color: #135d66;
+      flex-shrink: 0;
     }
 
     /* Header */
     .header {
-      padding-top: 14mm;
+      padding-top: 5mm;
       width: 100%;
     }
 
@@ -441,9 +438,9 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
 
     /* Footer */
     .footer-section {
-      position: absolute;
-      bottom: 14mm;
-      right: 16mm;
+      margin-top: auto;
+      padding-top: 10mm;
+      padding-bottom: 2mm;
       direction: rtl;
       display: flex;
       flex-direction: column;
@@ -669,12 +666,12 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
 
 
 /* ================================
-   PRINT IN A4 (EXACT SINGLE-PAGE A4)
+   PRINT IN A4 (MULTI-PAGE CAPABLE)
 ================================ */
 @media print {
   @page {
     size: A4 portrait;
-    margin: 0;
+    margin: 8mm 12mm 10mm 12mm;
   }
 
   /* Completely hide all screen/navigation elements */
@@ -686,72 +683,82 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
 
   html,
   body {
-    width: 210mm !important;
-    height: 297mm !important;
-    min-height: 297mm !important;
-    max-height: 297mm !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
     margin: 0 !important;
     padding: 0 !important;
     background: #ffffff !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
 
   .page-viewport {
     padding: 0 !important;
     margin: 0 !important;
     display: block !important;
-    width: 210mm !important;
-    height: 297mm !important;
-    min-height: 297mm !important;
-    max-height: 297mm !important;
-    overflow: hidden !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
     background: #ffffff !important;
   }
 
   .invoice-container {
-    width: 210mm !important;
-    height: 297mm !important;
-    min-height: 297mm !important;
-    max-height: 297mm !important;
-    padding: 0 16mm 16mm 16mm !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    padding: 0 !important;
     box-shadow: none !important;
     border-radius: 0 !important;
-    position: relative !important;
+    position: static !important;
     box-sizing: border-box !important;
-    display: flex !important;
-    flex-direction: column !important;
+    display: block !important;
     background: #ffffff !important;
-    page-break-after: avoid !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-    overflow: hidden !important;
+    page-break-after: auto !important;
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+    overflow: visible !important;
   }
 
   /* Top & bottom teal bars */
   .top-bar {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    height: 9mm !important;
+    position: static !important;
+    width: 100% !important;
+    height: 6mm !important;
+    margin: 0 0 4mm 0 !important;
     background-color: #135d66 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   .bottom-bar {
-    position: absolute !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    height: 9mm !important;
+    position: static !important;
+    width: 100% !important;
+    height: 6mm !important;
+    margin: 6mm 0 0 0 !important;
     background-color: #135d66 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-before: avoid !important;
+    break-before: avoid !important;
   }
 
   /* Header Section */
   .header {
-    padding-top: 14mm !important;
+    padding-top: 0 !important;
     width: 100% !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   .logo-wrapper {
@@ -837,9 +844,15 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
   }
 
   .items-table thead {
+    display: table-header-group !important;
     background-color: #d6b374 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+
+  .items-table tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   .items-table th {
@@ -852,6 +865,8 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
     border: none !important;
     background-color: #d6b374 !important;
     line-height: normal !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   .items-table td {
@@ -865,6 +880,8 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
     line-height: normal !important;
     word-break: normal !important;
     overflow-wrap: normal !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   .col-num { width: 8% !important; }
@@ -883,6 +900,8 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
     direction: ltr !important;
     width: 100% !important;
     gap: 0 !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   .summary-box {
@@ -890,6 +909,8 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
     direction: rtl !important;
     display: flex !important;
     flex-direction: column !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   .summary-row {
@@ -943,6 +964,8 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
     text-align: right !important;
     padding-right: 2mm !important;
     width: 100% !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   .notes-heading {
@@ -978,10 +1001,8 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
 
   /* Footer */
   .footer-section {
-    position: absolute !important;
-    bottom: 14mm !important;
-    right: 16mm !important;
-    margin-top: 0 !important;
+    position: static !important;
+    margin-top: 8mm !important;
     padding-bottom: 0 !important;
     direction: rtl !important;
     display: flex !important;
@@ -989,6 +1010,8 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
     gap: 2mm !important;
     align-items: flex-start !important;
     width: auto !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   .footer-contact-row {

@@ -141,6 +141,8 @@ export const normalizeInvoice = (doc, index = 0) => {
     total: doc.total != null ? Number(doc.total) : 0,
     tax: doc.tax != null ? String(doc.tax) : "0.00",
     date: formattedDate || new Date().toISOString().split("T")[0].replace(/-/g, "/"),
+    customerId: doc.customerId?._id || (typeof doc.customerId === "string" ? doc.customerId : null),
+    customerPhone: doc.customerId?.phone || doc.phone || "",
     items,
     rawDoc: doc,
   };
@@ -151,13 +153,17 @@ export const normalizeInvoice = (doc, index = 0) => {
  *
  * @param {Object} formData
  * @param {string} formData.customerName
+ * @param {string} [formData.customerId]
+ * @param {string} [formData.phone]
  * @param {Array} formData.items
  * @param {number|string} [formData.tax]
- * @returns {{ name: string, products: Array<{name: string, qty: number, price: number}>, tax: number }}
+ * @returns {{ name: string, customerId?: string, phone?: string, products: Array<{name: string, qty: number, price: number}>, tax: number }}
  */
-export const formatInvoiceForServer = ({ customerName, items = [], tax = 0, invoiceNumber }) => {
+export const formatInvoiceForServer = ({ customerName, customerId, phone, items = [], tax = 0, invoiceNumber }) => {
   return {
     name: customerName?.trim() || "عميل غير مسمى",
+    customerId: customerId || undefined,
+    phone: phone ? phone.trim() : undefined,
     tax: parseFloat(tax) || 0,
     invoiceNumber: invoiceNumber ? String(invoiceNumber) : undefined,
     products: (items || []).map((item) => ({

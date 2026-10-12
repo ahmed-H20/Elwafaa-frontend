@@ -15,8 +15,14 @@ export default function AdminPage({
     navigate(`/receipt?id=${inv.id || inv._id}`);
   };
 
-  const handleCreateNewInvoice = () => {
-    navigate("/receipt?new=true");
+  const handleCreateNewInvoice = (customer) => {
+    if (customer && customer.name) {
+      navigate(
+        `/receipt?new=true&customerName=${encodeURIComponent(customer.name)}&customerId=${customer._id || ""}&customerPhone=${encodeURIComponent(customer.phone || "")}`
+      );
+    } else {
+      navigate("/receipt?new=true");
+    }
   };
 
   return (
