@@ -141,6 +141,7 @@ export const normalizeInvoice = (doc, index = 0) => {
     total: doc.total != null ? Number(doc.total) : 0,
     tax: doc.tax != null ? String(doc.tax) : "0.00",
     date: formattedDate || new Date().toISOString().split("T")[0].replace(/-/g, "/"),
+    createdAt: doc.createdAt || null,
     customerId: doc.customerId?._id || (typeof doc.customerId === "string" ? doc.customerId : null),
     customerPhone: doc.customerId?.phone || doc.phone || "",
     items,

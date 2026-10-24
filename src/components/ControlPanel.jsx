@@ -9,8 +9,7 @@ import {
   User,
   Phone,
   Calendar,
-  Receipt as ReceiptIcon,
-  Percent
+  Receipt as ReceiptIcon
 } from "lucide-react";
 import "./ControlPanel.css";
 import { formatCurrency } from "../utils/arabicOrdinals";
@@ -223,25 +222,6 @@ export default function ControlPanel({
           </div>
         </div> */}
 
-        {/* Tax (Manual Input - الضريبة يدوي) */}
-        <div className="input-group">
-          <label className="input-label">
-            <span>
-              <Percent size={13} style={{ display: "inline", verticalAlign: "middle", marginLeft: 4 }} />
-              الضريبة
-            </span>
-            <span className="badge-tag manual">يدوي</span>
-          </label>
-          <input
-            type="number"
-            step="any"
-            min="0"
-            className="input-field"
-            value={tax}
-            onChange={(e) => setTax(e.target.value)}
-            placeholder="0"
-          />
-        </div>
       </section>
 
       {/* Items List Section */}
@@ -343,10 +323,6 @@ export default function ControlPanel({
         <div className="summary-row">
           <span>اجمالي السعر (تلقائي):</span>
           <strong>{formatCurrency(subtotal)}</strong>
-        </div>
-        <div className="summary-row">
-          <span>الضريبة (يدوي):</span>
-          <span>{formatCurrency(tax)}</span>
         </div>
         <div className="summary-row grand">
           <span>الإجمالي العام (تلقائي):</span>

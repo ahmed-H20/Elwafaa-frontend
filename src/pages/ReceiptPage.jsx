@@ -193,9 +193,8 @@ export default function ReceiptPage({
   }, [items]);
 
   const grandTotal = useMemo(() => {
-    const taxNum = parseFloat(tax) || 0;
-    return subtotal + (taxNum / 100 * subtotal);
-  }, [subtotal, tax]);
+    return subtotal;
+  }, [subtotal]);
 
   // Handlers
   const handleAddItem = () => {
@@ -256,8 +255,9 @@ export default function ReceiptPage({
       avatarLetters: clientInitials,
       avatarClass: "avatar-default",
       total: Math.round(grandTotal),
-      tax: tax,
+      tax: 0,
       date: invoiceDate,
+      createdAt: currentMongoId ? undefined : new Date().toISOString(),
       items: items,
     };
 
@@ -298,8 +298,9 @@ export default function ReceiptPage({
             avatarLetters: clientInitials,
             avatarClass: "avatar-default",
             total: Math.round(grandTotal),
-            tax: tax,
+            tax: 0,
             date: invoiceDate,
+            createdAt: currentMongoId ? undefined : new Date().toISOString(),
             items: items,
           });
           if (saved?._id) {
@@ -395,7 +396,7 @@ export default function ReceiptPage({
               return item.description + " " + item.quantity + " " + item.price + " " + item.total + "\\n";
             }).join("\\n"),
             total: Math.round(grandTotal),
-            tax: tax,
+            tax: 0,
             date: invoiceDate,
             link: `https://elwafaabackend.vercel.app/api/v1/invoice/${saved._id}/view`,
           });

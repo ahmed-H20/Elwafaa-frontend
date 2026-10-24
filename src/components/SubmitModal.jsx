@@ -71,10 +71,6 @@ export default function SubmitModal({
             <span>اجمالي السعر:</span>
             <span>{formatCurrency(subtotal)}</span>
           </div>
-          <div className="summary-item">
-            <span>الضريبة:</span>
-            <span>% {tax || 0}</span>
-          </div>
           <div className="summary-item highlight">
             <span>الإجمالي العام:</span>
             <span style={{ direction: "ltr" }}>{formatCurrency(grandTotal)}</span>

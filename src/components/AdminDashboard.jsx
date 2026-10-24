@@ -17,6 +17,7 @@ import {
   Eye,
   Receipt as ReceiptIcon,
   Calendar,
+  Clock,
 } from "lucide-react";
 import { getAllCustomers, getCustomerById } from "../APIs/customersAPI";
 import "./AdminDashboard.css";
@@ -91,39 +92,58 @@ export default function AdminDashboard({
   const [endDate, setEndDate] = useState("");
 
   const getInvoiceDateObj = (inv) => {
-    if (inv.createdAt) {
+    if (inv?.createdAt) {
       const d = new Date(inv.createdAt);
-      if (!isNaN(d.getTime())) return d;
+      if (!isNaN(d.getTime())) return { date: d, hasTime: true };
     }
-    if (inv.rawDoc?.createdAt) {
+    if (inv?.rawDoc?.createdAt) {
       const d = new Date(inv.rawDoc.createdAt);
-      if (!isNaN(d.getTime())) return d;
+      if (!isNaN(d.getTime())) return { date: d, hasTime: true };
     }
-    if (inv.date) {
-      const d = new Date(String(inv.date).replace(/\//g, "-"));
-      if (!isNaN(d.getTime())) return d;
-    }
-    if (inv._id && typeof inv._id === "string" && inv._id.length === 24) {
+    if (inv?._id && typeof inv._id === "string" && inv._id.length === 24) {
       const timestamp = parseInt(inv._id.substring(0, 8), 16) * 1000;
-      if (!isNaN(timestamp)) return new Date(timestamp);
+      if (!isNaN(timestamp)) return { date: new Date(timestamp), hasTime: true };
+    }
+    if (inv?.id && typeof inv.id === "string" && inv.id.startsWith("inv-")) {
+      const parts = inv.id.split("-");
+      const ts = parseInt(parts[1], 10);
+      if (!isNaN(ts) && ts > 1000000000000) return { date: new Date(ts), hasTime: true };
+    }
+    if (inv?.date) {
+      const d = new Date(String(inv.date).replace(/\//g, "-"));
+      if (!isNaN(d.getTime())) return { date: d, hasTime: false };
     }
     return null;
   };
 
   const formatDisplayDate = (inv) => {
-    const d = getInvoiceDateObj(inv);
-    if (!d) return inv.date || "-";
+    const info = getInvoiceDateObj(inv);
+    if (!info) return inv?.date || "-";
+    const d = info.date;
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
     const day = String(d.getDate()).padStart(2, "0");
     return `${year}/${month}/${day}`;
   };
 
+  const formatDisplayTime = (inv) => {
+    const info = getInvoiceDateObj(inv);
+    if (!info || !info.hasTime) return "";
+    const d = info.date;
+    let hours = d.getHours();
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    const ampm = hours >= 12 ? "م" : "ص";
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const strHours = String(hours).padStart(2, "0");
+    return `${strHours}:${minutes} ${ampm}`;
+  };
+
   // Sort invoices: Newest first (الأحدث أعلى)
   const sortedInvoices = useMemo(() => {
     return [...invoices].sort((a, b) => {
-      const timeA = getInvoiceDateObj(a)?.getTime() || 0;
-      const timeB = getInvoiceDateObj(b)?.getTime() || 0;
+      const timeA = getInvoiceDateObj(a)?.date.getTime() || 0;
+      const timeB = getInvoiceDateObj(b)?.date.getTime() || 0;
       return timeB - timeA;
     });
   }, [invoices]);
@@ -147,8 +167,9 @@ export default function AdminDashboard({
       const now = new Date();
       const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
       list = list.filter((inv) => {
-        const d = getInvoiceDateObj(inv);
-        if (!d) return false;
+        const info = getInvoiceDateObj(inv);
+        if (!info) return false;
+        const d = info.date;
         const invStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
         return invStr === todayStr;
       });
@@ -156,36 +177,36 @@ export default function AdminDashboard({
       const now = new Date();
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       list = list.filter((inv) => {
-        const d = getInvoiceDateObj(inv);
-        if (!d) return false;
-        return d >= weekAgo && d <= now;
+        const info = getInvoiceDateObj(inv);
+        if (!info) return false;
+        return info.date >= weekAgo && info.date <= now;
       });
     } else if (dateFilter === "month") {
       const now = new Date();
       const curMonth = now.getMonth();
       const curYear = now.getFullYear();
       list = list.filter((inv) => {
-        const d = getInvoiceDateObj(inv);
-        if (!d) return false;
-        return d.getMonth() === curMonth && d.getFullYear() === curYear;
+        const info = getInvoiceDateObj(inv);
+        if (!info) return false;
+        return info.date.getMonth() === curMonth && info.date.getFullYear() === curYear;
       });
     } else if (dateFilter === "custom") {
       if (startDate) {
         const start = new Date(startDate);
         start.setHours(0, 0, 0, 0);
         list = list.filter((inv) => {
-          const d = getInvoiceDateObj(inv);
-          if (!d) return false;
-          return d >= start;
+          const info = getInvoiceDateObj(inv);
+          if (!info) return false;
+          return info.date >= start;
         });
       }
       if (endDate) {
         const end = new Date(endDate);
         end.setHours(23, 59, 59, 999);
         list = list.filter((inv) => {
-          const d = getInvoiceDateObj(inv);
-          if (!d) return false;
-          return d <= end;
+          const info = getInvoiceDateObj(inv);
+          if (!info) return false;
+          return info.date <= end;
         });
       }
     }
@@ -557,7 +578,7 @@ export default function AdminDashboard({
                 <thead>
                   <tr>
                     <th className="th-client">اسم العميل</th>
-                    <th className="th-date" style={{ textAlign: "center" }}>التاريخ</th>
+                    <th className="th-date" style={{ textAlign: "center" }}>التاريخ والوقت</th>
                     <th className="th-action"></th>
                     <th className="th-total">الاجمالي العام</th>
                   </tr>
@@ -591,24 +612,53 @@ export default function AdminDashboard({
                         </div>
                       </td>
 
-                      {/* Invoice Date Column */}
+                      {/* Invoice Date & Time Column */}
                       <td style={{ textAlign: "center" }}>
                         <div
                           style={{
                             display: "inline-flex",
+                            flexDirection: "column",
                             alignItems: "center",
-                            gap: 5,
-                            padding: "4px 10px",
+                            gap: 3,
+                            padding: "5px 12px",
                             backgroundColor: "#f8fafc",
                             border: "1px solid #e2e8f0",
-                            borderRadius: "7px",
-                            fontSize: "12px",
-                            fontWeight: 600,
-                            color: "#334155",
+                            borderRadius: "8px",
+                            minWidth: "120px",
                           }}
                         >
-                          <Calendar size={13} style={{ color: "#0f766e" }} />
-                          <span dir="ltr">{formatDisplayDate(inv)}</span>
+                          <div
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 5,
+                              fontSize: "12px",
+                              fontWeight: 700,
+                              color: "#1e293b",
+                            }}
+                          >
+                            <Calendar size={13} style={{ color: "#0f766e" }} />
+                            <span dir="ltr">{formatDisplayDate(inv)}</span>
+                          </div>
+                          {formatDisplayTime(inv) && (
+                            <div
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 4,
+                                fontSize: "11px",
+                                fontWeight: 600,
+                                color: "#0f766e",
+                                backgroundColor: "#f0fdfa",
+                                padding: "1px 6px",
+                                borderRadius: "4px",
+                                border: "1px solid #ccfbf1",
+                              }}
+                            >
+                              <Clock size={11} style={{ color: "#0f766e" }} />
+                              <span dir="rtl">{formatDisplayTime(inv)}</span>
+                            </div>
+                          )}
                         </div>
                       </td>
 
@@ -1152,7 +1202,7 @@ export default function AdminDashboard({
                             رقم الفاتورة
                           </th>
                           <th style={{ padding: "10px 14px", color: "#475569" }}>
-                            التاريخ
+                            التاريخ والوقت
                           </th>
                           <th style={{ padding: "10px 14px", color: "#475569" }}>
                             الإجمالي
@@ -1190,11 +1240,26 @@ export default function AdminDashboard({
                                 color: "#64748b",
                               }}
                             >
-                              {inv.createdAt
-                                ? new Date(inv.createdAt).toLocaleDateString(
-                                    "ar-EG"
-                                  )
-                                : inv.date || "-"}
+                              <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                                <span style={{ fontWeight: 700, color: "#1e293b", fontSize: "12.5px" }} dir="ltr">
+                                  {formatDisplayDate(inv)}
+                                </span>
+                                {formatDisplayTime(inv) && (
+                                  <div
+                                    style={{
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      gap: 4,
+                                      fontSize: "11px",
+                                      fontWeight: 600,
+                                      color: "#0f766e",
+                                    }}
+                                  >
+                                    <Clock size={11} style={{ color: "#0f766e" }} />
+                                    <span dir="rtl">{formatDisplayTime(inv)}</span>
+                                  </div>
+                                )}
+                              </div>
                             </td>
                             <td
                               style={{

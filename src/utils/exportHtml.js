@@ -29,11 +29,10 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
     (acc, it) => acc + Number(it.quantity || 0) * Number(it.price || 0),
     0
   );
-  const taxRate = Number(invoice.tax || 0);
   const calculatedTotal =
     invoice.total !== undefined && invoice.total !== null
       ? Number(invoice.total)
-      : subtotal + (subtotal * taxRate) / 100;
+      : subtotal;
 
   const invoiceNumber =
     invoice.invoiceNumber || invoice.id || invoice._id || "1";
@@ -1137,11 +1136,6 @@ export function buildClientInvoiceHTML(invoice, options = {}) {
               <div>السعر</div>
             </div>
             <div class="summary-val">${subtotal.toFixed(2)}</div>
-          </div>
-
-          <div class="summary-row">
-            <div class="summary-label">الضريبة</div>
-            <div class="summary-val">${taxRate ? `% ${taxRate}` : "% 0"}</div>
           </div>
 
           <div class="summary-row-total">

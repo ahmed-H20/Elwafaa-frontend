@@ -132,15 +132,7 @@ export default function Receipt({
                 <div className="total-val">{formatCurrency(subtotal)}</div>
               </div>
 
-              {/* Row 2: Tax */}
-              <div className="total-row">
-                <div className="total-label-stacked">
-                  <span>الضريبة</span>
-                </div>
-                <div className="total-val">{tax !== "" && tax != null ? `% ${tax}` : "% 0"}</div>
-              </div>
-
-              {/* Row 3: Grand Total (Tan Highlight) */}
+              {/* Row 2: Grand Total (Tan Highlight) */}
               <div className="total-row grand-total-row">
                 <div className="total-label-stacked bold-label">
                   <span>الإجمالي</span>
