@@ -14,6 +14,7 @@ export default function SubmitModal({
   tax,
   grandTotal,
   onOpenHtmlView,
+  onOpenThermalView,
   onDownloadPdf,
   onDirectDownloadPdf,
   onShareWhatsApp,
@@ -27,6 +28,12 @@ export default function SubmitModal({
       onOpenHtmlView();
     } else if (onDownloadPdf) {
       onDownloadPdf();
+    }
+  };
+
+  const handleOpenThermal = () => {
+    if (onOpenThermalView) {
+      onOpenThermalView();
     }
   };
 
@@ -90,6 +97,26 @@ export default function SubmitModal({
             <span>{isGeneratingPdf ? "جاري فتح الفاتورة..." : "فتح الفاتورة للطباعة والتحميل"}</span>
             <ExternalLink size={15} style={{ opacity: 0.85, marginRight: "auto" }} />
           </button>
+
+          {/* Thermal Receipt Button */}
+          {onOpenThermalView && (
+            <button
+              type="button"
+              className="btn-modal-primary btn-modal-thermal"
+              onClick={handleOpenThermal}
+              disabled={isGeneratingPdf}
+              title="طباعة فاتورة حرارية مقاس 55 مم مناسبة للطابعات الحرارية أو الهاتف"
+              style={{
+                backgroundColor: "#d6b374",
+                color: "#111827",
+                marginTop: "8px",
+              }}
+            >
+              <Printer size={18} />
+              <span>طباعة فاتورة حرارية (55mm)</span>
+              <ExternalLink size={15} style={{ opacity: 0.85, marginRight: "auto" }} />
+            </button>
+          )}
 
           {/* WhatsApp Share Button */}
           {/* <button

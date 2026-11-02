@@ -696,6 +696,30 @@ export default function AdminDashboard({
                             <span>طباعة / HTML</span>
                           </a>
 
+                          <a
+                            href={`${import.meta.env.VITE_BACKEND_URL}/api/v1/invoices/${inv.id || inv._id}/thermal`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="طباعة فاتورة حرارية 55 مم مناسبة للطابعة الحرارية والهاتف"
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 4,
+                              padding: "6px 9px",
+                              borderRadius: "6px",
+                              backgroundColor: "#fffbeb",
+                              color: "#b45309",
+                              border: "1px solid #fde68a",
+                              textDecoration: "none",
+                              fontSize: 12,
+                              fontWeight: 700,
+                              transition: "all 0.2s",
+                            }}
+                          >
+                            <Printer size={13} />
+                            <span>حراري</span>
+                          </a>
+
                           <button
                             type="button"
                             className="btn-view-invoice"
@@ -1302,6 +1326,28 @@ export default function AdminDashboard({
                                 >
                                   <Printer size={12} />
                                   <span>طباعة</span>
+                                </a>
+                                <a
+                                  href={`${import.meta.env.VITE_BACKEND_URL}/api/v1/invoices/${inv.id || inv._id}/thermal`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  title="طباعة فاتورة حرارية 55 مم"
+                                  style={{
+                                    padding: "5px 8px",
+                                    borderRadius: 6,
+                                    background: "#fffbeb",
+                                    color: "#b45309",
+                                    border: "1px solid #fde68a",
+                                    fontSize: 12,
+                                    fontWeight: 700,
+                                    textDecoration: "none",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 4,
+                                  }}
+                                >
+                                  <Printer size={12} />
+                                  <span>حراري</span>
                                 </a>
                                 <button
                                   type="button"

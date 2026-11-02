@@ -19,7 +19,7 @@ import {
 } from "../utils/arabicOrdinals";
 import { downloadReceiptPDF, shareReceiptOnWhatsApp } from "../utils/exportPdf";
 import { shareReceiptImage } from "../utils/shareImage";
-import { openInvoiceInBlankHtmlPage } from "../utils/exportHtml";
+import { openInvoiceInBlankHtmlPage, openThermalInBlankHtmlPage } from "../utils/exportHtml";
 import { initialSampleItems } from "../data/invoicesData";
 import {
   getInvoiceById,
@@ -27,6 +27,7 @@ import {
   downloadInvoicePDFFromServer,
   fetchInvoicePDFBlob,
   openInvoiceHTMLView,
+  openThermalInvoiceView,
 } from "../APIs/invoicesAPI";
 import { getAllCustomers } from "../APIs/customersAPI";
 import {
@@ -346,6 +347,77 @@ export default function ReceiptPage({
     }
   };
 
+  const handleOpenThermalView = async (autoPrint = true, idOverride) => {
+    setIsGeneratingPdf(true);
+    let targetId = idOverride || currentMongoId || searchParams.get("id");
+
+    try {
+      if (!targetId || String(targetId).startsWith("inv-")) {
+        const saveFn = onSaveInvoice || onSaveNewInvoice;
+        if (saveFn) {
+          const clientInitials = customerName
+            ? customerName.split(" ").filter(Boolean).map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+            : "CL";
+          const finalRawNum = invoiceNumber?.trim() || getNextInvoiceNumber(invoicesList);
+          const formattedInvNum = formatInvoiceNumber(finalRawNum);
+          const saved = await saveFn({
+            _id: currentMongoId,
+            id: currentMongoId || `inv-${Date.now()}`,
+            clientName: customerName || `عميل #${finalRawNum}`,
+            customerId: customerId || null,
+            customerPhone: customerPhone || "",
+            invoiceNumber: formattedInvNum,
+            avatarLetters: clientInitials,
+            avatarClass: "avatar-default",
+            total: Math.round(grandTotal),
+            tax: 0,
+            date: invoiceDate,
+            createdAt: currentMongoId ? undefined : new Date().toISOString(),
+            items: items,
+          });
+          if (saved?._id) {
+            targetId = saved._id;
+            setCurrentMongoId(saved._id);
+          }
+        }
+      }
+
+      if (targetId && !String(targetId).startsWith("inv-")) {
+        openThermalInvoiceView(targetId, autoPrint);
+      } else {
+        openThermalInBlankHtmlPage(
+          {
+            _id: targetId,
+            invoiceNumber,
+            customerName,
+            invoiceDate,
+            items,
+            tax,
+            total: grandTotal,
+          },
+          autoPrint
+        );
+      }
+    } catch (err) {
+      console.warn("Could not open thermal view:", err);
+      console.warn("Could not open thermal view from server, opening local view:", err);
+      openThermalInBlankHtmlPage(
+        {
+          _id: targetId,
+          invoiceNumber,
+          customerName,
+          invoiceDate,
+          items,
+          tax,
+          total: grandTotal,
+        },
+        autoPrint
+      );
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
   const handleDownloadPdf = async (idOverride) => {
     // Open in blank page HTML with invoice design and can download from it by print or download
     await handleOpenHtmlView(false, idOverride);
@@ -433,6 +505,7 @@ export default function ReceiptPage({
         downloadPdf: () => handleOpenHtmlView(false),
         print: () => handleOpenHtmlView(true),
         openHtml: () => handleOpenHtmlView(false),
+        openThermal: () => handleOpenThermalView(true),
         directDownloadPdf: handleDirectDownloadPdf,
         shareWhatsApp: handleShareWhatsApp,
       };
@@ -570,6 +643,7 @@ export default function ReceiptPage({
         tax={tax}
         grandTotal={grandTotal}
         onOpenHtmlView={() => handleOpenHtmlView(false)}
+        onOpenThermalView={() => handleOpenThermalView(true)}
         onDownloadPdf={handleDownloadPdf}
         onDirectDownloadPdf={handleDirectDownloadPdf}
         onShareWhatsApp={handleShareWhatsApp}

@@ -254,3 +254,27 @@ export const openInvoiceHTMLView = (id, autoPrint = false) => {
     }, 500);
   }
 };
+
+/**
+ * Opens the thermal receipt (55mm) in a new page/tab with instant print option.
+ *
+ * @param {string} id - MongoDB invoice _id
+ * @param {boolean} [autoPrint=false]
+ */
+export const openThermalInvoiceView = (id, autoPrint = false) => {
+  if (!id) throw new Error("Invoice ID is required to open thermal receipt");
+  const url = `${import.meta.env.VITE_BACKEND_URL}/api/v1/invoices/${id}/thermal${autoPrint ? "?print=true" : ""}`;
+
+  const win = window.open(url, "_blank");
+  if (!win || win.closed || typeof win.closed === "undefined") {
+    const a = document.createElement("a");
+    a.href = url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      if (document.body.contains(a)) document.body.removeChild(a);
+    }, 500);
+  }
+};
